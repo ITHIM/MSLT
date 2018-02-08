@@ -67,4 +67,23 @@ c_mid_age <- round(sum(sc_age, ec_age) / 2)
 
 ## Cohort specific age, data and sex settings
 # In this case we are generating cohorts for females, mid_aged 27
-lf_df_females <- run_cohorts(in_idata = idata, sex = "females", in_mid_age = 27)
+lf_df_females_bl <- run_cohorts(in_idata = idata, in_sex = "females", in_mid_age = 27)
+
+
+## Import *practice* scenario life table data
+sc_data <- read.csv("data/sc_lf.csv", header = T, stringsAsFactors = F)
+
+sub_idata <- filter(idata, age >= 22)
+
+sub_idata[sub_idata$sex == "males" ,]$mx <- sc_data[sc_data$age <= 100 & sc_data$sex == "male",]$sc_mx
+
+sub_idata[sub_idata$sex == "females" ,]$mx <- sc_data[sc_data$age <= 100 & sc_data$sex == "female",]$sc_mx
+
+sub_idata[sub_idata$sex == "males" ,]$pyld_rate <- sc_data[sc_data$age <= 100 & sc_data$sex == "male",]$sc_wx
+
+sub_idata[sub_idata$sex == "females" ,]$pyld_rate <- sc_data[sc_data$age <= 100 & sc_data$sex == "female",]$sc_wx
+
+## Practice scenario's cohort specific age, data and sex settings
+# In this case we are generating cohorts for females, mid_aged 27
+lf_df_females_sc <- run_cohorts(in_idata = sub_idata, in_sex = "females", in_mid_age = 22)
+
