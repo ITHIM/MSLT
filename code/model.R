@@ -1,5 +1,8 @@
 # Load all functions
 source("code/functions.R")
+
+rm(list=ls())
+
 # Read data
 idata <- read.csv("data/data.csv", stringsAsFactors = F)
 
@@ -51,6 +54,7 @@ for (i in 1:20){
 # Create a new variable for the probability of dying between age now and now + 1
 # Formula = IF(age<100,1-EXP(-mortality rate),1)
 
+
 idata$qx <- ifelse(idata$age < 100, 1 - exp(-1 * idata$mx), 1)
 
 # Assume start and end age specified by users
@@ -84,6 +88,13 @@ sub_idata[sub_idata$sex == "males" ,]$pyld_rate <- sc_data[sc_data$age <= 100 & 
 sub_idata[sub_idata$sex == "females" ,]$pyld_rate <- sc_data[sc_data$age <= 100 & sc_data$sex == "female",]$sc_wx
 
 ## Practice scenario's cohort specific age, data and sex settings
-# In this case we are generating cohorts for females, mid_aged 27
-lf_df_females_sc <- run_cohorts(in_idata = sub_idata, in_sex = "females", in_mid_age = 22)
+  # In this case we are generating cohorts for females, mid_aged 27
+  lf_df_females_sc <- run_cohorts(in_idata = sub_idata, in_sex = "females", in_mid_age = 22)
 
+##Create disease life tables (created a function for this "run_disease)
+
+  # Ischemic heart disease
+  
+  dlt_df_females_bl <- run_disease(in_idata = idata, in_sex = "females", in_mid_age = 27, in_disease = "ihd")
+  
+ 

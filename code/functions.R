@@ -1,10 +1,13 @@
-## function to run cohorts
+## Function to run age and sex cohorts
+
+#Required package dplyr
+
+require(dplyr)
 
 run_cohorts <- function(in_idata, in_sex, in_mid_age)
 {
   # Create a Life Table data frame
-  # read dplyr library
-  require(dplyr)
+ 
   # Filter in_idata by age and select columns for lifetable calculations
   lf_df <- filter(in_idata, age >= in_mid_age & sex == in_sex) %>% select(sex, age, qx, pyld_rate, mx)
   
@@ -52,3 +55,44 @@ run_cohorts <- function(in_idata, in_sex, in_mid_age)
   lf_df
   
 }
+
+
+# Create disease Life Table data frame function
+    
+  run_disease <- function(in_idata, in_mid_age, in_sex, in_disease) 
+  {
+    
+  #Create disease variable for the disease life table function 
+    
+  disease <- c("ihd", "istroke", "diabetes", "colon_cancer", "breast_cancer")
+  
+  in_disease <- names(idata %>% select(contains("disease")))
+  
+  #Input disease
+  
+  incidence <- paste("incidence", disease, sep = "_")
+  case_fatality <- paste("case_fatality", disease, sep = "_")
+  dw <- paste("dw", disease, sep = "_")
+  
+
+  # Filter in_idata by age and select columns for lifetable calculations
+  dlt_df <- filter(idata == in_idata, age >= in_mid_age, sex == in_sex & disease == in_disease ) %>% select(sex, age, incidence_ihd, case_fatality_ihd, dw_ihd, incidence_istroke, case_fatality_istroke, dw_istroke, incidence_diabetes, case_fatality_diabetes, dw_diabetes, breast_cancer_incidence, breast_cancer_case_fatality, breast_cancer_dw, colon_cancer_incidence, colon_cancer_case_fatality, colon_cancer_dw)
+    
+    #Create list of required columns
+    ##Intermediate variables lx, qx, wx and vx
+    ###lx
+    dlt_df$lx <- 0
+    dlt_df$lx <- idata$incidence + idata$case_fatality
+    ###qx
+    dlt_df$qx <- 0
+    dlt_df$qx <-  sqrt((idata$incidence- idata$case_fatality)*(idata$incidence - idata$case_fatality))
+    ### wx
+    dlt_df$wx <- exp(-1*(dlt_df$lx+dlt_df$qx)/2)
+    ### vx
+    dlt_df$vx <- exp(-1*(dlt_df$lx-dlt_df$qx)/2)
+    
+  }
+
+  
+    
+    
