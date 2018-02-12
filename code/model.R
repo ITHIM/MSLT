@@ -95,7 +95,7 @@ lf_df_females_sc <- run_cohorts(in_idata = sub_idata, in_sex = "females", in_mid
 
 # Ischemic heart disease
 
-dlt_df_females_bl <- run_disease(in_idata = idata, in_sex = "females", in_mid_age = 22, in_disease = "ihd")
+dlt_df_females_bl <- run_disease(in_idata = sub_idata, in_sex = "females", in_mid_age = 22, in_disease = "ihd")
 
-dlt_df_males_bl <- run_disease(in_idata = idata, in_sex = "males", in_mid_age = 22, in_disease = "ihd")
+dlt_df_males_bl <- run_disease(in_idata = sub_idata, in_sex = "males", in_mid_age = 22, in_disease = "ihd")
 
