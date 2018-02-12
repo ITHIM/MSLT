@@ -73,7 +73,7 @@ run_disease <- function(in_idata, in_mid_age, in_sex, in_disease)
   
   # Filter in_idata by age and select columns for lifetable calculations
   dlt_df <- filter(in_idata, age >= in_mid_age & sex == in_sex) %>% 
-    select(sex, age, dw_disease, incidence_disease, case_fatality_disease)
+  select(sex, age, dw_disease, incidence_disease, case_fatality_disease)
   
   #Create list of required columns
   ##Intermediate variables lx, qx, wx and vx
@@ -85,7 +85,30 @@ run_disease <- function(in_idata, in_mid_age, in_sex, in_disease)
   dlt_df$wx <- exp(-1*(dlt_df$lx+dlt_df$qx)/2)
   ### vx
   dlt_df$vx <- exp(-1*(dlt_df$lx-dlt_df$qx)/2)
+  ## Healthy (Sx), Disease (Cx) and Death (Dx)
+  ###Sx
+  for (i in 1:nrow(dlt_df)){
+    if (age == mid_age)
+      dlt_df$Sx[i] <- 1000
+    else
+      dlt_df$Sx[i] <- ((2*(dlt_df$vx[i-1]-dlt_df$wx[i-1])*(dlt_df$Sx[i-1]*(dlt_df$case_fatality_disease[i-1]+0)+dlt_df$Cx[i-1]*0)+dlt_df$Sx[i-1]*(dlt_df$vx[i-1]*(dlt_df$qx[i-1]-dlt_df$lx[i-1])+dlt_df$wx[i-1]*(dlt_df$qx[i-1]+dlt_df$lx[i-1]))))/(2*dlt_df$qx[i-1])
+  }
+  ###Cx
+  for (i in 1:nrow(dlt_df)){
+    if (age == mid_age)
+      dlt_df$Cx[i] <- 0
+    else
+      dlt_df$Cx[i] <-  ((dlt_df$vx[i-1]-dlt_df$wx[i-1])*(2*(dlt_df$case_fatality_disease[i-1]+0)*(dlt_df$Sx[i-1]+dlt_df$Cx[i-1])-dlt_df$lx[i-1]*dlt_df$Cx[i-1]*dlt_df$lx[i-1])-dlt_df$Cx[i-1]*dlt_df$qx[i-1]*(dlt_df$vx[i-1]+dlt_df$wx[i-1]))/(2*dlt_df$qx[i-1])
+  }
+  ###Dx
+  for (i in 1:nrow(dlt_df)){
+    if (age == mid_age)
+      dlt_df$Dx[i] <- 0
+    else
+      dlt_df$Dx[i] <- ((dlt_df$vx[i-1]-dlt_df$wx[i-1])*(2*dlt_df$case_fatality_disease[i-1]*dlt_df$Cx[i-1]-dlt_df$lx[i-1]*(dlt_df$Sx[i-1]+dlt_df$Cx[i-1]))-dlt_df$qx[i-1]*(dlt_df$Sx[i-1]+dlt_df$Cx[i-1])*(dlt_df$vx[i-1]+dlt_df$wx[i-1])+2*dlt_df$qx[i-1]*(dlt_df$Sx[i-1]+dlt_df$Cx[i-1]+dlt_df$Dx[i-1]))/(2*dlt_df$qx[i-1])
+  }
   
   dlt_df
   
 }
+  
