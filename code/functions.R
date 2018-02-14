@@ -3,6 +3,7 @@
 #Required package dplyr
 
 require(dplyr)
+require(tidyverse)
 
 run_cohorts <- function(in_idata, in_sex, in_mid_age)
 {
@@ -60,8 +61,8 @@ run_cohorts <- function(in_idata, in_sex, in_mid_age)
 # Create disease Life Table data frame function
 
 run_disease <- function(in_idata, in_mid_age, in_sex, in_disease) 
-{
   
+{
   
   # Uncomment the variables below to debug your code  
   # in_idata = sub_idata
@@ -93,31 +94,90 @@ run_disease <- function(in_idata, in_mid_age, in_sex, in_disease)
   dlt_df$wx <- exp(-1*(dlt_df$lx+dlt_df$qx)/2)
   ### vx
   dlt_df$vx <- exp(-1*(dlt_df$lx-dlt_df$qx)/2)
-  ## Healthy (Sx), Disease (Cx) and Death (Dx)
+  
+  ## Healthy (Sx), Disease (Cx) and Death (Dx), total (Tx) (control check, has to be 1000), total alive (Ax)
+  ##persons years live at risk (PYx), prevalence rate (px), mortality rate (mx)
+  ###Remission and mortality from other causes were replaced by zero in the formulas (as we assume no remission and independence of disease mortality with total mortlaity). 
+  
+  ####First create empty variables
   
   dlt_df$Sx <- 0
   dlt_df$Cx <- 0
   dlt_df$Dx <- 0
+  dlt_df$Tx  <- 0
+  dlt_df$Ax <- 0
+  dlt_df$PYx <- 0
+  dlt_df$px <- 0
+  dlt_df$mx <- 0
+
+  #####Start with variables without calculation exceptions
   
   for (i in 1:nrow(dlt_df)){
+    dlt_df$Tx   <- dlt_df$Sx + dlt_df$Cx + dlt_df$Dx 
+    dlt_df$Ax <- dlt_df$Sx + dlt_df$Cx
+
+
+  #####Variables with exceptions  
+    
+  for (i in 1:nrow(dlt_df)){
+      if (i < nrow(dlt_df))
+        dlt_df$PYx[i] <- sum(dlt_df$Ax[i] + dlt_df$Ax[i + 1])/2
+      else
+        dlt_df$PYx[i] <- 0
+      
+  
+      if(is.na(sum(dlt_df$Cx[i] + dlt_df$Cx[i + 1])/2)) { 
+          dlt_df$px[i] <- 0
+        }
+       else{
+          dlt_df$px[i] <- (sum(dlt_df$Cx[i] + dlt_df$Cx[i + 1])/2) / dlt_df$PYx[i]    
+
+
+  
+      if ((dlt_df$Dx[i+1] - dlt_df$Dx[i]) < 0){
+            dlt_df$mx[i] <- 0
+           }
+      else{
+      dlt_df$mx[i] <- ((dlt_df$Dx[i+1] - dlt_df$Dx[i])/dlt_df$PYx[i])
+
+        
     if (dlt_df$age[i] == in_mid_age){
       dlt_df$Sx[i] <- 1000
       dlt_df$Cx[i] <- 0
       dlt_df$Dx[i] <- 0
+  
     }
     else{
-      dlt_df$Sx[i] <- ifelse(dlt_df$qx[i-1] > 0, ((2*(dlt_df$vx[i-1]-dlt_df$wx[i-1])*(dlt_df$Sx[i-1]*(dlt_df$case_fatality_disease[i-1]+0)+dlt_df$Cx[i-1]*0)+dlt_df$Sx[i-1]*(dlt_df$vx[i-1]*(dlt_df$qx[i-1]-dlt_df$lx[i-1])+dlt_df$wx[i-1]*(dlt_df$qx[i-1]+dlt_df$lx[i-1])))) / 2 * (dlt_df$qx[i-1]), dlt_df$Sx[i - 1] )
-      dlt_df$Cx[i] <- ifelse(dlt_df$qx[i-1] > 0, -1*((dlt_df$vx[i-1]-dlt_df$wx[i-1])*(2*((dlt_df$case_fatality_disease[i-1]+0+0)*(dlt_df$Sx[i-1]+dlt_df$Cx[i-1])-dlt_df$lx[i-1]*dlt_df$Sx[i-1]+0*dlt_df$Sx[i-1])-dlt_df$Cx[i-1]*dlt_df$lx[i-1])-dlt_df$Cx[i-1]*dlt_df$qx[i-1]*(dlt_df$vx[i-1]+dlt_df$wx[i-1])) / 2 * (dlt_df$qx[i-1]), dlt_df$Cx[i - 1] )
+      dlt_df$Sx[i] <- ifelse(dlt_df$qx[i-1] > 0, (2*(dlt_df$vx[i-1] - dlt_df$wx[i-1]) * 
+                            (dlt_df$Sx[i-1] * (dlt_df$case_fatality_disease [i-1] + 0 +0) + 
+                              dlt_df$Cx[i-1] * 0) + dlt_df$Sx[i-1] * (dlt_df$vx[i-1] * (dlt_df$qx[i-1] 
+                              - dlt_df$lx[i-1]) + dlt_df$wx[i-1] * (dlt_df$qx[i-1] + dlt_df$lx[i-1]))) 
+                                / (2 * (dlt_df$qx[i-1])), dlt_df$Sx[i - 1] )
+      dlt_df$Cx[i] <- ifelse(dlt_df$qx[i-1] > 0, -1*((dlt_df$vx[i-1] - dlt_df$wx[i-1])*
+                              (2*((dlt_df$case_fatality_disease[i-1] + 0 + 0) * 
+                                (dlt_df$Sx[i-1]+dlt_df$Cx[i-1]) - dlt_df$lx[i-1] * dlt_df$Sx[i-1] + 0 * 
+                                  dlt_df$Sx[i-1]) - dlt_df$Cx[i-1] * dlt_df$lx[i-1]) - dlt_df$Cx[i-1] * 
+                                  dlt_df$qx[i-1] * (dlt_df$vx[i-1]+dlt_df$wx[i-1])) 
+                                  / (2 * (dlt_df$qx[i-1])), dlt_df$Cx[i - 1])
       dlt_df$Dx[i] <- ifelse(dlt_df$qx[i-1] > 0, ((dlt_df$vx[i-1] - dlt_df$wx[i-1]) * 
                                (2 * dlt_df$case_fatality_disease[i-1] * 
                                   dlt_df$Cx[i-1] - dlt_df$lx[i-1]*
                                   (dlt_df$Sx[i-1] + dlt_df$Cx[i-1]))
                                    - dlt_df$qx[i-1] * (dlt_df$Sx[i-1] + dlt_df$Cx[i-1])
                                       *(dlt_df$vx[i-1]+dlt_df$wx[i-1]) + 2 * dlt_df$qx[i-1] * 
-                                       (dlt_df$Sx[i-1]+dlt_df$Cx[i-1]+dlt_df$Dx[i-1])) / 2 * (dlt_df$qx[i-1]), dlt_df$Cx[i - 1] )
-    }
+                                       (dlt_df$Sx[i-1]+dlt_df$Cx[i-1]+dlt_df$Dx[i-1])) 
+                                        / (2 * (dlt_df$qx[i-1])), dlt_df$Cx[i - 1])
+     
+
   }
   
-  dlt_df
+}
+
+} 
+  }
+ 
   
+  }
+  dlt_df
+
 }

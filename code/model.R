@@ -3,6 +3,12 @@ rm (list = ls())
 # Load all functions
 source("code/functions.R")
 
+##Note that disease trends are excluded for now. We need to generate a trends function for diseases, mortality (all cause), 
+##change in disease due to change in risk factor exposure (discuss with Niel M), road injuries effect over time. 
+##Eventually, we want to add (1) CRA ITHIM approach to compare results and (2) use all cause mortaltiy instead of 
+##disease specific dose responses for incidence to understand the difference in results for all cause mortality. 
+
+
 # Read data
 idata <- read.csv("data/data.csv", stringsAsFactors = F)
 
@@ -87,15 +93,24 @@ sub_idata[sub_idata$sex == "males" ,]$pyld_rate <- sc_data[sc_data$age <= 100 & 
 
 sub_idata[sub_idata$sex == "females" ,]$pyld_rate <- sc_data[sc_data$age <= 100 & sc_data$sex == "female",]$sc_wx
 
-## Practice scenario's cohort specific age, data and sex settings
+
+
+##Here we would need loops ove age and sex and storate results for baseline and scenario. 
+## General life talble: practice scenario's cohort specific age, data and sex settings. 
+## change function parameters to visualise other cohorts and sex. 
+
 # In this case we are generating cohorts for females, mid_aged 27
+
 lf_df_females_sc <- run_cohorts(in_idata = sub_idata, in_sex = "females", in_mid_age = 22)
 
-##Create disease life tables (created a function for this "run_disease)
-
-# Ischemic heart disease
+##Disease life table: uses run_disease function, change function arguments to visualise other diseases
 
 dlt_df_females_bl <- run_disease(in_idata = sub_idata, in_sex = "females", in_mid_age = 22, in_disease = "ihd")
 
+##To prevent scientific notation in data frame
+options(scipen=999)
+
 dlt_df_males_bl <- run_disease(in_idata = sub_idata, in_sex = "males", in_mid_age = 22, in_disease = "ihd")
 
+##To prevent scientific notation in data frame
+options(scipen=999)
