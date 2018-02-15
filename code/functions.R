@@ -109,75 +109,131 @@ run_disease <- function(in_idata, in_mid_age, in_sex, in_disease)
   dlt_df$PYx <- 0
   dlt_df$px <- 0
   dlt_df$mx <- 0
-
+  
   #####Start with variables without calculation exceptions
   
   for (i in 1:nrow(dlt_df)){
     dlt_df$Tx   <- dlt_df$Sx + dlt_df$Cx + dlt_df$Dx 
     dlt_df$Ax <- dlt_df$Sx + dlt_df$Cx
-
-
-  #####Variables with exceptions  
     
-  for (i in 1:nrow(dlt_df)){
+    
+    #####Variables with exceptions  
+    
+    for (i in 1:nrow(dlt_df)){
       if (i < nrow(dlt_df))
         dlt_df$PYx[i] <- sum(dlt_df$Ax[i] + dlt_df$Ax[i + 1])/2
       else
         dlt_df$PYx[i] <- 0
       
-  
+      
       if(is.na(sum(dlt_df$Cx[i] + dlt_df$Cx[i + 1])/2)) { 
-          dlt_df$px[i] <- 0
-        }
-       else{
-          dlt_df$px[i] <- (sum(dlt_df$Cx[i] + dlt_df$Cx[i + 1])/2) / dlt_df$PYx[i]    
-
-
-  
-      if ((dlt_df$Dx[i+1] - dlt_df$Dx[i]) < 0){
-            dlt_df$mx[i] <- 0
-           }
+        dlt_df$px[i] <- 0
+      }
       else{
-      dlt_df$mx[i] <- ((dlt_df$Dx[i+1] - dlt_df$Dx[i])/dlt_df$PYx[i])
-
+        dlt_df$px[i] <- (sum(dlt_df$Cx[i] + dlt_df$Cx[i + 1])/2) / dlt_df$PYx[i]    
         
-    if (dlt_df$age[i] == in_mid_age){
-      dlt_df$Sx[i] <- 1000
-      dlt_df$Cx[i] <- 0
-      dlt_df$Dx[i] <- 0
-  
+        
+        
+        if ((dlt_df$Dx[i+1] - dlt_df$Dx[i]) < 0){
+          dlt_df$mx[i] <- 0
+        }
+        else{
+          dlt_df$mx[i] <- ((dlt_df$Dx[i+1] - dlt_df$Dx[i])/dlt_df$PYx[i])
+          
+          
+          if (dlt_df$age[i] == in_mid_age){
+            dlt_df$Sx[i] <- 1000
+            dlt_df$Cx[i] <- 0
+            dlt_df$Dx[i] <- 0
+            
+          }
+          else{
+            dlt_df$Sx[i] <- ifelse(dlt_df$qx[i-1] > 0, (2*(dlt_df$vx[i-1] - dlt_df$wx[i-1]) * 
+                                                          (dlt_df$Sx[i-1] * (dlt_df$case_fatality_disease [i-1] + 0 +0) + 
+                                                             dlt_df$Cx[i-1] * 0) + dlt_df$Sx[i-1] * (dlt_df$vx[i-1] * (dlt_df$qx[i-1] 
+                                                                                                                       - dlt_df$lx[i-1]) + dlt_df$wx[i-1] * (dlt_df$qx[i-1] + dlt_df$lx[i-1]))) 
+                                   / (2 * (dlt_df$qx[i-1])), dlt_df$Sx[i - 1] )
+            dlt_df$Cx[i] <- ifelse(dlt_df$qx[i-1] > 0, -1*((dlt_df$vx[i-1] - dlt_df$wx[i-1])*
+                                                             (2*((dlt_df$case_fatality_disease[i-1] + 0 + 0) * 
+                                                                   (dlt_df$Sx[i-1]+dlt_df$Cx[i-1]) - dlt_df$lx[i-1] * dlt_df$Sx[i-1] + 0 * 
+                                                                   dlt_df$Sx[i-1]) - dlt_df$Cx[i-1] * dlt_df$lx[i-1]) - dlt_df$Cx[i-1] * 
+                                                             dlt_df$qx[i-1] * (dlt_df$vx[i-1]+dlt_df$wx[i-1])) 
+                                   / (2 * (dlt_df$qx[i-1])), dlt_df$Cx[i - 1])
+            dlt_df$Dx[i] <- ifelse(dlt_df$qx[i-1] > 0, ((dlt_df$vx[i-1] - dlt_df$wx[i-1]) * 
+                                                          (2 * dlt_df$case_fatality_disease[i-1] * 
+                                                             dlt_df$Cx[i-1] - dlt_df$lx[i-1]*
+                                                             (dlt_df$Sx[i-1] + dlt_df$Cx[i-1]))
+                                                        - dlt_df$qx[i-1] * (dlt_df$Sx[i-1] + dlt_df$Cx[i-1])
+                                                        *(dlt_df$vx[i-1]+dlt_df$wx[i-1]) + 2 * dlt_df$qx[i-1] * 
+                                                          (dlt_df$Sx[i-1]+dlt_df$Cx[i-1]+dlt_df$Dx[i-1])) 
+                                   / (2 * (dlt_df$qx[i-1])), dlt_df$Cx[i - 1])
+            
+            
+          }
+          
+        }
+        
+      } 
     }
-    else{
-      dlt_df$Sx[i] <- ifelse(dlt_df$qx[i-1] > 0, (2*(dlt_df$vx[i-1] - dlt_df$wx[i-1]) * 
-                            (dlt_df$Sx[i-1] * (dlt_df$case_fatality_disease [i-1] + 0 +0) + 
-                              dlt_df$Cx[i-1] * 0) + dlt_df$Sx[i-1] * (dlt_df$vx[i-1] * (dlt_df$qx[i-1] 
-                              - dlt_df$lx[i-1]) + dlt_df$wx[i-1] * (dlt_df$qx[i-1] + dlt_df$lx[i-1]))) 
-                                / (2 * (dlt_df$qx[i-1])), dlt_df$Sx[i - 1] )
-      dlt_df$Cx[i] <- ifelse(dlt_df$qx[i-1] > 0, -1*((dlt_df$vx[i-1] - dlt_df$wx[i-1])*
-                              (2*((dlt_df$case_fatality_disease[i-1] + 0 + 0) * 
-                                (dlt_df$Sx[i-1]+dlt_df$Cx[i-1]) - dlt_df$lx[i-1] * dlt_df$Sx[i-1] + 0 * 
-                                  dlt_df$Sx[i-1]) - dlt_df$Cx[i-1] * dlt_df$lx[i-1]) - dlt_df$Cx[i-1] * 
-                                  dlt_df$qx[i-1] * (dlt_df$vx[i-1]+dlt_df$wx[i-1])) 
-                                  / (2 * (dlt_df$qx[i-1])), dlt_df$Cx[i - 1])
-      dlt_df$Dx[i] <- ifelse(dlt_df$qx[i-1] > 0, ((dlt_df$vx[i-1] - dlt_df$wx[i-1]) * 
-                               (2 * dlt_df$case_fatality_disease[i-1] * 
-                                  dlt_df$Cx[i-1] - dlt_df$lx[i-1]*
-                                  (dlt_df$Sx[i-1] + dlt_df$Cx[i-1]))
-                                   - dlt_df$qx[i-1] * (dlt_df$Sx[i-1] + dlt_df$Cx[i-1])
-                                      *(dlt_df$vx[i-1]+dlt_df$wx[i-1]) + 2 * dlt_df$qx[i-1] * 
-                                       (dlt_df$Sx[i-1]+dlt_df$Cx[i-1]+dlt_df$Dx[i-1])) 
-                                        / (2 * (dlt_df$qx[i-1])), dlt_df$Cx[i - 1])
-     
-
-  }
-  
-}
-
-} 
-  }
- 
-  
+    
+    
   }
   dlt_df
-
+  
 }
+
+
+##Function to run disease potential impact fractions
+
+####Here I will need two data frames, one for the RRs and the other for the energy expenditure
+####Also, here I need to add uncertainty to the RRs (and energy expenditure later), in_exp is to define the
+#### assumption on teh exponent for energy expenditure
+###add energy expenditure to rr data frame for now,
+
+# #Disease values for function to pick from relative risks data
+# 
+# disease <- c("ihd", "istroke", "diabetes", "colon_cancer", "breast_cancer")
+# 
+# rr_age <- c(30, 45, 70, 80)
+# 
+# 
+# run_pif <- function(in_idata, in_mid_age, in_sex, in_disease, in_rr_age, ...)
+# 
+# {
+#   
+# 
+# ###Filter data to use in pif calculations (age and sex). Add rrs, ee and calculations
+# 
+#   pif_df <- filter(in_idata, sex == in_sex, age >= in_mid_age, disease == in_disease, rr_age == in_rr_age) 
+#   %>%  select(sex, age)
+#   
+# 
+# ###Generate pif_df variables
+# {
+# 
+#   pif_df$rr_inactive <- 0
+#   pif_df$rr_insufficiently_active <- 0
+#   pif_df$rr_recommended_level_active <- 0
+#   pif_df$rr_highly_active <- 0
+#   pif_df$se_inactive <- 0
+#   pif_df$se_insufficiently_active <- 0
+#   pif_df$se_recommended_level_active <- 0
+#   pif_df$ee_highly_active <- 0
+#   pif_df$ee_inactive <- 0
+#   pif_df$ee_insufficiently_active <- 0
+#   pif_df$ee_recommended_level_active <- 0
+#   pif_df$ee_highly_active <- 0
+# 
+# 
+# ###Values pif_df values. Inputs from relative risks and mean energy levels per pa category
+#   #categories are: inactive, insufficiently active, recommended level active and sufficiently active
+#   #pif calculations will need to be customised to data sources, or link with ITHIM developments. 
+#   #The RRs here are from Danaei et al 2009 and mean energy expenditure is from the Australian Health Survey
+#   
+#   
+#   
+# }  
+# 
+# pif_df
+# 
+# }

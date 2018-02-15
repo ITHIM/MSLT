@@ -1,6 +1,13 @@
 # Remove all variables
+
 rm (list = ls())
+
+#Set working directory
+
+
+
 # Load all functions
+
 source("code/functions.R")
 
 ##Note that disease trends are excluded for now. We need to generate a trends function for diseases, mortality (all cause), 
@@ -9,19 +16,27 @@ source("code/functions.R")
 ##disease specific dose responses for incidence to understand the difference in results for all cause mortality. 
 
 
-# Read data
-idata <- read.csv("data/data.csv", stringsAsFactors = F)
+# Read data. idata: life table and disease life tables (including trends). edata: exposure data (e.g. physical activity).
+#irr.data: relative risks data and ee: energy expenditure
+##For exposure (edata) and input (idata) data I am using already generated categories, but a function should be developed to work from raw data. 
+idata <- read.csv("data/idata.csv", stringsAsFactors = F)
+edata <- read.csv("data/edata.csv", stringsAsFactors = F)
+irr <- read.csv("data/irr.csv", stringsAsFactors = F)
+ee <- read.csv("data/ee.csv", stringsAsFactors = F)
 
-# Make lower cases values for sex column
+
+##Prepare input data. Depends on data sources
+
+### Make lower cases values for sex column
 idata$sex <- tolower(idata$sex)
 
-# Rename mortality_rate to mx
+### Rename mortality_rate to mx
 idata$mx <- idata$mortality_rate
 
-# Remove mortality_rate column
+### Remove mortality_rate column
 idata$mortality_rate <- NULL
 
-# Create new variable for 5_year population (age cohorts)
+# Create new variable for 5_year population (age cohorts). Depends on the age-cohorts of interest (5-yrs here)
 idata$five_year_population <- NA
 start_index <- 3
 index <- 1
@@ -55,16 +70,22 @@ for (i in 1:20){
   start_index <- start_index + 5
 }
 
-### General lifetable
+#Generate life tables: general life table and disease specific life tables. 
 
-# Create a new variable for the probability of dying between age now and now + 1
-# Formula = IF(age<100,1-EXP(-mortality rate),1)
+## General lifetable. Starts from population numbers per one year interval and mortality rates
+##mortaltiy rates = deaths (1-yr/people 1-yr)
+
+### Create a new variable for the probability of dying between age now and now + 1
+#### Formula = IF(age<100,1-EXP(-mortality rate),1)
 
 
 idata$qx <- ifelse(idata$age < 100, 1 - exp(-1 * idata$mx), 1)
 
-# Assume start and end age specified by users
-# For now we assume static values
+
+##General life table calculations: for cohorts, we need to set start and end age. 
+###May be best to move this at the begining of the code. 
+#### Assume start and end age specified by users
+##### For now we assume static values
 
 # start cohort mid age
 sc_age <- 20
@@ -76,8 +97,10 @@ ec_age <- 24
 c_mid_age <- round(sum(sc_age, ec_age) / 2)
 
 ## Cohort specific age, data and sex settings
+####Loops or functions will be better here to generate all cohorts data for baseline and intervention at the same time and save values. 
 # In this case we are generating cohorts for females, mid_aged 27
-lf_df_females_bl <- run_cohorts(in_idata = idata, in_sex = "females", in_mid_age = 27)
+
+lt_df_females_bl <- run_cohorts(in_idata = idata, in_sex = "females", in_mid_age = 27)
 
 
 ## Import *practice* scenario life table data
@@ -101,7 +124,7 @@ sub_idata[sub_idata$sex == "females" ,]$pyld_rate <- sc_data[sc_data$age <= 100 
 
 # In this case we are generating cohorts for females, mid_aged 27
 
-lf_df_females_sc <- run_cohorts(in_idata = sub_idata, in_sex = "females", in_mid_age = 22)
+lt_df_females_sc <- run_cohorts(in_idata = sub_idata, in_sex = "females", in_mid_age = 22)
 
 ##Disease life table: uses run_disease function, change function arguments to visualise other diseases
 
@@ -114,3 +137,8 @@ dlt_df_males_bl <- run_disease(in_idata = sub_idata, in_sex = "males", in_mid_ag
 
 ##To prevent scientific notation in data frame
 options(scipen=999)
+
+# # ####Generate RRs data frame
+# # 
+# # 
+# pif_bl <- run_pif(in_idata = sub_idata , in_sex = "females", in_mid_age = 22, in_rr_age = 30, in_disease = "ihd")
