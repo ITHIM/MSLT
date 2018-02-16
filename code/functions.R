@@ -193,7 +193,7 @@ run_disease <- function(in_idata, in_mid_age, in_sex, in_disease)
 ###add energy expenditure to rr data frame for now,
 
 # 
-run_pif <- function(in_idata, in_mid_age, in_sex, in_disease, in_age) 
+run_pif <- function(in_idata, in_mid_age, in_sex, in_age, in_disease) 
 # 
 {
 ###Filter data to use in pif calculations (age and sex). Add rrs, ee and calculations
@@ -201,42 +201,34 @@ run_pif <- function(in_idata, in_mid_age, in_sex, in_disease, in_age)
 pif_df <- filter(in_idata, age >= in_mid_age & sex == in_sex) %>%
   select(sex, age)
 
+###Add varaibles to data.frame
 
-# ##Create variables to use vlookup funciton to match with irr values for pif_df and irr data frames
-# 
-# ###pif_df
-# 
-# ####Variables to concatenate
-#
-{
-pif_df$disease <- c("ihd", "istroke", "diabetes", "breast_cancer", "colon_cancer")
-  pif_df$age_cat <- if 
-              (disease == "breast_cancer") {
-              pif_df$age_cat[pif_df$age > 0 & pif_df$age <=30] <- 30
-              pif_df$age_cat[pif_df$age > 30 & pif_df$age <=45] <- 45
-              pif_df$age_cat[pif_df$age > 45 & pif_df$age <=70] <- 70
-              pif_df$age_cat[pif_df$age > 70 & pif_df$age <=100] <- 80}
-              else {
-              pif_df$age_cat [pif_df$age > 0 & pif_df$age <=30] <- 30
-              pif_df$age_cat [pif_df$age > 30 & pif_df$age <=70] <- 70
-              pif_df$age_cat [pif_df$age > 70 & pif_df$age <=100] <- 80
-              
-  }
-}
+pif_df$disease <- in_disease
+pif_df$age_cat [pif_df$age <=30] <- 30
+pif_df$age_cat [pif_df$age >30 & pif_df$age <=45 ] <- 45
+pif_df$age_cat [pif_df$age >45 & pif_df$age <=70 ] <- 70
+pif_df$age_cat [pif_df$age >70 & pif_df$age <=100 ] <- 80
+pif_df$sex_cat <- ifelse(in_disease == "breast_cancer", "female", "female_male")
+                     
+##Create concatenated variables to match pif_df with irr
+pif_df$sex_age_dis_cat <- paste(pif_df$disease,pif_df$age_cat, pif_df$sex_cat, sep = "_"  )
+irr$sex_age_dis_cat <- paste(irr$disease,irr$age, irr$sex, sep = "_"  )
+
 pif_df}
+
 # 
 # 
 # 
 # 
 # 
-# pif_df$sex_cat <- ifelse(pif_df$disease == "breast_cancer", "female", "female_male")
-# pif_df$sex_age_dis_cat <- paste(pif_df$disease,pif_df$age_cat, pif_df$sex_cat, sep = "_"  )
+
+# 
 # 
 # 
 # ###irr (input relative risks) data frame. For all diseases, except breast cancer, we have three age groups. 
 # 
 # 
-# irr$sex_age_dis_cat <- paste(irr$disease,irr$age, irr$sex, sep = "_"  )
+# 
 # 
 # 
 # # 

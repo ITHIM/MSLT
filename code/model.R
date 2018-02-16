@@ -2,10 +2,6 @@
 
 rm (list = ls())
 
-#Set working directory
-
-
-
 # Load all functions
 
 source("code/functions.R")
