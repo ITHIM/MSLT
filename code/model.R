@@ -141,4 +141,4 @@ options(scipen=999)
 # # ####Generate RRs data frame
 # # 
 # # 
-# pif_bl <- run_pif(in_idata = sub_idata , in_sex = "females", in_mid_age = 22, in_rr_age = 30, in_disease = "ihd")
+pif_bl <- run_pif(in_idata = idata , in_sex = "females", in_mid_age = 22, in_disease = "ihd")

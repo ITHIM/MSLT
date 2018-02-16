@@ -5,6 +5,8 @@
 require(dplyr)
 require(tidyverse)
 
+
+
 run_cohorts <- function(in_idata, in_sex, in_mid_age)
 {
   # Create a Life Table data frame
@@ -190,50 +192,82 @@ run_disease <- function(in_idata, in_mid_age, in_sex, in_disease)
 #### assumption on teh exponent for energy expenditure
 ###add energy expenditure to rr data frame for now,
 
-# #Disease values for function to pick from relative risks data
 # 
-# disease <- c("ihd", "istroke", "diabetes", "colon_cancer", "breast_cancer")
+run_pif <- function(in_idata, in_mid_age, in_sex, in_disease, in_age) 
 # 
-# rr_age <- c(30, 45, 70, 80)
+{
+###Filter data to use in pif calculations (age and sex). Add rrs, ee and calculations
+
+pif_df <- filter(in_idata, age >= in_mid_age & sex == in_sex) %>%
+  select(sex, age)
+
+
+# ##Create variables to use vlookup funciton to match with irr values for pif_df and irr data frames
+# 
+# ###pif_df
+# 
+# ####Variables to concatenate
+#
+{
+pif_df$disease <- c("ihd", "istroke", "diabetes", "breast_cancer", "colon_cancer")
+  pif_df$age_cat <- if 
+              (disease == "breast_cancer") {
+              pif_df$age_cat[pif_df$age > 0 & pif_df$age <=30] <- 30
+              pif_df$age_cat[pif_df$age > 30 & pif_df$age <=45] <- 45
+              pif_df$age_cat[pif_df$age > 45 & pif_df$age <=70] <- 70
+              pif_df$age_cat[pif_df$age > 70 & pif_df$age <=100] <- 80}
+              else {
+              pif_df$age_cat [pif_df$age > 0 & pif_df$age <=30] <- 30
+              pif_df$age_cat [pif_df$age > 30 & pif_df$age <=70] <- 70
+              pif_df$age_cat [pif_df$age > 70 & pif_df$age <=100] <- 80
+              
+  }
+}
+pif_df}
 # 
 # 
-# run_pif <- function(in_idata, in_mid_age, in_sex, in_disease, in_rr_age, ...)
-# 
-# {
-#   
-# 
-# ###Filter data to use in pif calculations (age and sex). Add rrs, ee and calculations
-# 
-#   pif_df <- filter(in_idata, sex == in_sex, age >= in_mid_age, disease == in_disease, rr_age == in_rr_age) 
-#   %>%  select(sex, age)
-#   
-# 
-# ###Generate pif_df variables
-# {
-# 
-#   pif_df$rr_inactive <- 0
-#   pif_df$rr_insufficiently_active <- 0
-#   pif_df$rr_recommended_level_active <- 0
-#   pif_df$rr_highly_active <- 0
-#   pif_df$se_inactive <- 0
-#   pif_df$se_insufficiently_active <- 0
-#   pif_df$se_recommended_level_active <- 0
-#   pif_df$ee_highly_active <- 0
-#   pif_df$ee_inactive <- 0
-#   pif_df$ee_insufficiently_active <- 0
-#   pif_df$ee_recommended_level_active <- 0
-#   pif_df$ee_highly_active <- 0
 # 
 # 
-# ###Values pif_df values. Inputs from relative risks and mean energy levels per pa category
-#   #categories are: inactive, insufficiently active, recommended level active and sufficiently active
-#   #pif calculations will need to be customised to data sources, or link with ITHIM developments. 
-#   #The RRs here are from Danaei et al 2009 and mean energy expenditure is from the Australian Health Survey
-#   
-#   
-#   
-# }  
 # 
-# pif_df
+# pif_df$sex_cat <- ifelse(pif_df$disease == "breast_cancer", "female", "female_male")
+# pif_df$sex_age_dis_cat <- paste(pif_df$disease,pif_df$age_cat, pif_df$sex_cat, sep = "_"  )
+# 
+# 
+# ###irr (input relative risks) data frame. For all diseases, except breast cancer, we have three age groups. 
+# 
+# 
+# irr$sex_age_dis_cat <- paste(irr$disease,irr$age, irr$sex, sep = "_"  )
+# 
+# 
+# # 
+# # ###
+# # # 
+# # left_join(pif_df, irr, by = "sex_age_dis_cat", copy = TRUE)
+# #   
+# # pif_df$rr_inactive [irr$sex_age_dis_cat == pif_df$sex_age_dis_cat] <- irr$rr_inactive
+# #   # pif_df$rr_insufficiently_active <- 0
+# #   # pif_df$rr_recommended_level_active <- 0
+# #   # pif_df$rr_highly_active <- 0
+# #   # pif_df$se_inactive <- 0
+# #   # pif_df$se_insufficiently_active <- 0
+# #   # pif_df$se_recommended_level_active <- 0
+# #   # pif_df$ee_highly_active <- 0
+# #   # pif_df$ee_inactive <- 0
+# #   # pif_df$ee_insufficiently_active <- 0
+# #   # pif_df$ee_recommended_level_active <- 0
+# #   # pif_df$ee_highly_active <- 0
+# # 
+# # #
+# # # ###Values pif_df values. Inputs from relative risks and mean energy levels per pa category
+# # #   #categories are: inactive, insufficiently active, recommended level active and sufficiently active
+# # #   #pif calculations will need to be customised to data sources, or link with ITHIM developments.
+# # #   #The RRs here are from Danaei et al 2009 and mean energy expenditure is from the Australian Health Survey
+# # #
+# # #
+# # #
 # 
 # }
+# pif_df
+# }
+# 
+# 
