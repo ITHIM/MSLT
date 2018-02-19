@@ -184,9 +184,16 @@ run_disease <- function(in_idata, in_mid_age, in_sex, in_disease)
 ##to the power transfomation of energy expenditure. 
 
 # ADD IN POWER INPUT FOR POWER TRANSFORMATION OF METS
-run_pif <- function(in_idata, in_mid_age, in_sex, in_age, in_disease) 
+run_pif <- function(in_idata, i_irr, in_mid_age, in_sex, in_age, in_disease, in_met_exponential = 1) 
 # 
 {
+  
+  
+  in_idata = idata 
+  i_irr = irr
+  in_sex = "females"
+  in_mid_age = 22
+  in_disease = "ihd"
 ###Filter data to use in pif calculations (age and sex). Add rrs, ee and calculations
 
 pif_df <- filter(in_idata, age >= in_mid_age & sex == in_sex) %>%
@@ -201,22 +208,54 @@ pif_df$age_cat [pif_df$age >45 & pif_df$age <=70 ] <- 70
 pif_df$age_cat [pif_df$age >70 & pif_df$age <=100 ] <- 80
 pif_df$sex_cat <- ifelse(in_disease == "breast_cancer", "female", "female_male")
                      
-##Create concatenated variables to match pif_df with irr
+##Create concatenated variables to match pif_df with i_irr
 pif_df$sex_age_dis_cat <- paste(pif_df$disease,pif_df$age_cat, pif_df$sex_cat, sep = "_"  )
-irr$sex_age_dis_cat <- paste(irr$disease,irr$age, irr$sex, sep = "_"  )
+i_irr$sex_age_dis_cat <- paste(i_irr$disease,i_irr$age, i_irr$sex, sep = "_"  )
+
+# Remove sex, age and disease variables from i_irr df, as they are not needed
+i_irr <- select(i_irr, -one_of('sex','age', 'disease'))
 
 ## The code below is working but copies age, sex and disease for x and y, how can this be avoided?
-pif_df <-  inner_join(pif_df, irr, by = c("sex_age_dis_cat" = "sex_age_dis_cat") , copy = FALSE)
+pif_df <-  inner_join(pif_df, i_irr, by = c("sex_age_dis_cat" = "sex_age_dis_cat") , copy = FALSE)
+
+## Example creation of splineFun which uses baseline's RR and EE
+for (i in 1:nrow(pif_df)){
+  sp_obj <-  splinefun(y = c(pif_df$rr_inactive[i], 
+                                       pif_df$rr_insufficiently_active[i], 
+                                       pif_df$rr_recommended_level_active[i], 
+                                       pif_df$rr_highly_active[i]), 
+                                 x = c(pif_df$ee_inactive[i], 
+                                       pif_df$ee_insufficiently_active[i], 
+                                       pif_df$ee_recommended_level_active[i], 
+                                       pif_df$ee_highly_active[i]), 
+                                 method = "hyman")
+  pif_df$sc_ee_inactive[i] <-  pif_df$ee_inactive[i] + 100
+  pif_df$sc_ee_insufficiently_active[i] <-  pif_df$ee_insufficiently_active[i] + 100
+  pif_df$sc_ee_recommended_level_active[i] <-  pif_df$ee_recommended_level_active[i] + 100 
+  pif_df$sc_ee_highly_active[i] <-  pif_df$ee_highly_active[i] + 100
+  
+  
+  pif_df$sc_rr_inactive[i] <- sp_obj(x = pif_df$sc_ee_inactive[i])
+  pif_df$sc_rr_insufficiently_active[i] <-  sp_obj(x = pif_df$sc_ee_insufficiently_active[i])
+  pif_df$sc_rr_recommended_level_active[i] <-  sp_obj(x = pif_df$sc_ee_recommended_level_active[i])
+  pif_df$sc_rr_highly_active[i] <-  sp_obj(x = pif_df$sc_ee_highly_active[i])
+  
+  # plot(sp_obj, xlab = "RR", ylab = "EE", main = paste("Spline ", i))
+}
+
+
+## round sc_rr_highly_active column - it should be 1
+pif_df$sc_rr_highly_active <- round(pif_df$sc_rr_highly_active)
 
 ##RRs function (fitted to the log of the RR and an exponential transformation or METs)
 ###We need to transpose RR and energy expenditure?
 
 ##Select data for RRs slope and intercepts calculations
 
-rrs_ee_select <- select(pif_df$rr_inactive, pif_df$rr_insufficiently_active, 
-                        pif_df$rr_recommended_level_active, pif_df$rr_highly_active, 
-                        pif_df$ee_inactive, pif_df$ee_insufficiently_active, 
-                        pif_df$ee_recommended_level_active, pif_df$ee_highly_active)
+# rrs_ee_select <- select(pif_df$rr_inactive, pif_df$rr_insufficiently_active, 
+#                         pif_df$rr_recommended_level_active, pif_df$rr_highly_active, 
+#                         pif_df$ee_inactive, pif_df$ee_insufficiently_active, 
+#                         pif_df$ee_recommended_level_active, pif_df$ee_highly_active)
 
 
 
