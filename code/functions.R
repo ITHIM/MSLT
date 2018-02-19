@@ -1,10 +1,11 @@
 ## Function to run age and sex cohorts
 
-#Required package dplyr
+
+
+#Required packages
 
 require(dplyr)
 require(tidyverse)
-
 
 
 run_cohorts <- function(in_idata, in_sex, in_mid_age)
@@ -171,28 +172,18 @@ run_disease <- function(in_idata, in_mid_age, in_sex, in_disease)
                                    / (2 * (dlt_df$qx[i-1])), dlt_df$Cx[i - 1])
             
             
-          }
-          
-        }
-        
-      } 
-    }
-    
-    
-  }
+          }}}}}
   dlt_df
-  
 }
 
 
-##Function to run disease potential impact fractions
+##Function to run disease potential impact fractions (PIFs)
+##The code for PIFs will depend on the data sources. 
+##Here I am creating cohort-pif function with RR (SE) and energy expenditure (METs per week). 
+##These data RR and energy expenditure is then used to fit a log linear function 
+##to the power transfomation of energy expenditure. 
 
-####Here I will need two data frames, one for the RRs and the other for the energy expenditure
-####Also, here I need to add uncertainty to the RRs (and energy expenditure later), in_exp is to define the
-#### assumption on teh exponent for energy expenditure
-###add energy expenditure to rr data frame for now,
-
-# 
+# ADD IN POWER INPUT FOR POWER TRANSFORMATION OF METS
 run_pif <- function(in_idata, in_mid_age, in_sex, in_age, in_disease) 
 # 
 {
@@ -214,52 +205,21 @@ pif_df$sex_cat <- ifelse(in_disease == "breast_cancer", "female", "female_male")
 pif_df$sex_age_dis_cat <- paste(pif_df$disease,pif_df$age_cat, pif_df$sex_cat, sep = "_"  )
 irr$sex_age_dis_cat <- paste(irr$disease,irr$age, irr$sex, sep = "_"  )
 
+## The code below is working but copies age, sex and disease for x and y, how can this be avoided?
+pif_df <-  inner_join(pif_df, irr, by = c("sex_age_dis_cat" = "sex_age_dis_cat") , copy = FALSE)
+
+##RRs function (fitted to the log of the RR and an exponential transformation or METs)
+###We need to transpose RR and energy expenditure?
+
+##Select data for RRs slope and intercepts calculations
+
+rrs_ee_select <- select(pif_df$rr_inactive, pif_df$rr_insufficiently_active, 
+                        pif_df$rr_recommended_level_active, pif_df$rr_highly_active, 
+                        pif_df$ee_inactive, pif_df$ee_insufficiently_active, 
+                        pif_df$ee_recommended_level_active, pif_df$ee_highly_active)
+
+
+
 pif_df}
 
-# 
-# 
-# 
-# 
-# 
-
-# 
-# 
-# 
-# ###irr (input relative risks) data frame. For all diseases, except breast cancer, we have three age groups. 
-# 
-# 
-# 
-# 
-# 
-# # 
-# # ###
-# # # 
-# # left_join(pif_df, irr, by = "sex_age_dis_cat", copy = TRUE)
-# #   
-# # pif_df$rr_inactive [irr$sex_age_dis_cat == pif_df$sex_age_dis_cat] <- irr$rr_inactive
-# #   # pif_df$rr_insufficiently_active <- 0
-# #   # pif_df$rr_recommended_level_active <- 0
-# #   # pif_df$rr_highly_active <- 0
-# #   # pif_df$se_inactive <- 0
-# #   # pif_df$se_insufficiently_active <- 0
-# #   # pif_df$se_recommended_level_active <- 0
-# #   # pif_df$ee_highly_active <- 0
-# #   # pif_df$ee_inactive <- 0
-# #   # pif_df$ee_insufficiently_active <- 0
-# #   # pif_df$ee_recommended_level_active <- 0
-# #   # pif_df$ee_highly_active <- 0
-# # 
-# # #
-# # # ###Values pif_df values. Inputs from relative risks and mean energy levels per pa category
-# # #   #categories are: inactive, insufficiently active, recommended level active and sufficiently active
-# # #   #pif calculations will need to be customised to data sources, or link with ITHIM developments.
-# # #   #The RRs here are from Danaei et al 2009 and mean energy expenditure is from the Australian Health Survey
-# # #
-# # #
-# # #
-# 
-# }
-# pif_df
-# }
-# 
 # 
