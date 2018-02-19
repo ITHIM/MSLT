@@ -135,4 +135,4 @@ dlt_df_males_bl <- run_disease(in_idata = sub_idata, in_sex = "males", in_mid_ag
 # # ####Generate RRs data frame
 # # 
 # # 
-pif_bl <- run_pif(in_idata = idata , i_irr = irr, in_sex = "females", in_mid_age = 22, in_disease = "ihd", in_met_exponential = 1)
+pif_bl <- run_pif(in_idata = idata , i_irr = irr, in_sex = "females", in_mid_age = 22, in_disease = "ihd", in_met_sc = 100)
