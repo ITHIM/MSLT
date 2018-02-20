@@ -184,17 +184,18 @@ run_disease <- function(in_idata, in_mid_age, in_sex, in_disease)
 ##to the power transfomation of energy expenditure. 
 
 # ADD IN POWER INPUT FOR POWER TRANSFORMATION OF METS
-run_pif <- function(in_idata, i_irr, in_mid_age, in_sex, in_age, in_disease, in_met_sc) 
+run_pif <- function(in_idata, i_irr, i_exposure, in_mid_age, in_sex, in_age, in_disease, in_met_sc) 
 # 
 {
   
 ##Uncomment to debug function
-  
-  # in_idata = idata 
-  # i_irr = irr
-  # in_sex = "females"
-  # in_mid_age = 22
-  # in_disease = "ihd"
+#   
+in_idata = idata
+i_irr = irr
+i_exposure = edata
+in_sex = "females"
+in_mid_age = 22
+in_disease = "ihd"
 ###Filter data to use in pif calculations (age and sex). Add rrs, ee and calculations
 
 pif_df <- filter(in_idata, age >= in_mid_age & sex == in_sex) %>%
@@ -244,6 +245,37 @@ for (i in 1:nrow(pif_df)){
 
 ## round sc_rr_highly_active column - it should be 1
 pif_df$sc_rr_highly_active <- round(pif_df$sc_rr_highly_active)
+
+##Calculate PIFs. I already process the data to generate categories in stata.
+##First add PA categories to pif_df
+
+pif_df$sex_age_cat <- paste(pif_df$sex, pif_df$age, sep = "_"  )
+i_exposure$sex_age_cat <- paste(i_exposure$sex, i_exposure$age, sep = "_"  )
+
+# Remove sex, age and disease variables from i_irr df, as they are not needed
+i_exposure <- select(i_exposure, -one_of('sex','age'))
+
+#Join edata (PA prevalence to pif_df)
+
+pif_df <-  inner_join(pif_df, i_exposure, by = c("sex_age_cat" = "sex_age_cat") , copy = FALSE)
+
+
+##We need to adapt to ITHIMR developments. REPLACE DATA FRAME FROM WHICH PREVALENCE OF PA IS TAKEN
+
+ pif_df$pif <- 1-(pif_df$sc_rr_inactive *pif_df$inactive +
+               pif_df$sc_rr_insufficiently_active*pif_df$insufficiently_active +
+               pif_df$sc_rr_recommended_level_active*pif_df$recommended_level_active +
+               pif_df$sc_rr_highly_active *pif_df$highly_active)/
+                (pif_df$rr_inactive *pif_df$inactive  +
+                  pif_df$rr_insufficiently_active *pif_df$insufficiently_active +
+                  pif_df$rr_recommended_level_active *pif_df$recommended_level_active +
+                  pif_df$rr_highly_active *pif_df$highly_active)
+
+ 
+##THE ISSUE HERE IS WITH THE PREVALENCE DATA FOR PA, I NEED TO ADD THIS TO THE DATAFRAME TO DO 
+ ##THE COHORT CALCULATIONS, AS DONE WITH THE RRS. 
+
+
 
 
 pif_df}

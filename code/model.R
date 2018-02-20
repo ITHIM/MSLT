@@ -36,6 +36,11 @@ idata$mx <- idata$mortality_rate
 ### Remove mortality_rate column
 idata$mortality_rate <- NULL
 
+### Rename male for males and female for females in edata to match idata. 
+
+edata$sex[edata$sex=="male"] <- "males"
+edata$sex[edata$sex=="female"] <- "females"
+
 # Create new variable for 5_year population (age cohorts). Depends on the age-cohorts of interest (5-yrs here)
 idata$five_year_population <- NA
 start_index <- 3
@@ -135,4 +140,4 @@ dlt_df_males_bl <- run_disease(in_idata = sub_idata, in_sex = "males", in_mid_ag
 # # ####Generate RRs data frame
 # # 
 # # 
-pif_bl <- run_pif(in_idata = idata , i_irr = irr, in_sex = "females", in_mid_age = 22, in_disease = "ihd", in_met_sc = 100)
+pif_bl <- run_pif(in_idata = idata , i_irr = irr, i_exposure = edata, in_sex = "males", in_mid_age = 22, in_disease = "ihd", in_met_sc = 100)
