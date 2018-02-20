@@ -24,7 +24,7 @@ edata <- read.csv("data/edata.csv", stringsAsFactors = F)
 irr <- read.csv("data/irr.csv", stringsAsFactors = F)
 ee <- read.csv("data/ee.csv", stringsAsFactors = F)
 
-
+#Parameters (here specify age groups, gender, intervention effect)
 ##Prepare input data. Depends on data sources
 
 ### Make lower cases values for sex column
@@ -90,25 +90,27 @@ idata$qx <- ifelse(idata$age < 100, 1 - exp(-1 * idata$mx), 1)
 ##General life table calculations: for cohorts, we need to set start and end age. 
 ###May be best to move this at the begining of the code. 
 #### Assume start and end age specified by users
-##### For now we assume static values
+##### For now we assume static values. I COMMENTED THIS MIDE AGE CALCULATIONS AS THESE 
+##### ARE NOT USED, BUT WE MAY NEED THEM TO DEFINE THE SCEANRIOS TO RUN AND NOT HAVE
+##### CHANGE IN EACH FUNCTION
 
 # start cohort mid age
-sc_age <- 20
-
-# end cohort mid age
-ec_age <- 24
-
-# Specify cohort middle age
-c_mid_age <- round(sum(sc_age, ec_age) / 2)
+# sc_age <- 30
+# 
+# # end cohort mid age
+# ec_age <- 34
+# 
+# # Specify cohort middle age
+# c_mid_age <- round(sum(sc_age, ec_age) / 2)
 
 ## Cohort specific age, data and sex settings
 ####Loops or functions will be better here to generate all cohorts data for baseline and intervention at the same time and save values. 
 # In this case we are generating cohorts for females, mid_aged 27
 
-lt_df_females_bl <- run_cohorts(in_idata = idata, in_sex = "females", in_mid_age = 27)
+lt_df_females_bl <- run_cohorts(in_idata = idata, in_sex = "females", in_mid_age = 52)
 
 
-## Import *practice* scenario life table data
+## Import *practice* scenario life table data (DELETE WHEN LIFE TABLE CALCS ARE INCLUDED)
 sc_data <- read.csv("data/sc_lf.csv", header = T, stringsAsFactors = F)
 
 sub_idata <- filter(idata, age >= 22)
@@ -129,15 +131,15 @@ sub_idata[sub_idata$sex == "females" ,]$pyld_rate <- sc_data[sc_data$age <= 100 
 
 # In this case we are generating cohorts for females, mid_aged 27
 
-lt_df_females_sc <- run_cohorts(in_idata = sub_idata, in_sex = "females", in_mid_age = 22)
+lt_df_females_sc <- run_cohorts(in_idata = sub_idata, in_sex = "females", in_mid_age = 52)
 
 ##Disease life table: uses run_disease function, change function arguments to visualise other diseases
 
-dlt_df_females_bl <- run_disease(in_idata = sub_idata, in_sex = "females", in_mid_age = 22, in_disease = "ihd")
+dlt_df_females_bl <- run_disease(in_idata = idata, in_sex = "females", in_mid_age = 32, in_disease = "ihd")
 
-dlt_df_males_bl <- run_disease(in_idata = sub_idata, in_sex = "males", in_mid_age = 22, in_disease = "ihd")
+dlt_df_males_bl <- run_disease(in_idata = idata, in_sex = "males", in_mid_age = 32, in_disease = "ihd")
 
-# # ####Generate RRs data frame
-# # 
-# # 
-pif_bl <- run_pif(in_idata = idata , i_irr = irr, i_exposure = edata, in_sex = "males", in_mid_age = 22, in_disease = "ihd", in_met_sc = 100)
+##PIFs calculations (dataframe) (We applied a spline to derive RRs, which means that the results will be different to the excel)
+pif <- run_pif(in_idata = idata , i_irr = irr, i_exposure = edata, in_mid_age = 42, in_sex = "females", in_disease = "diabetes", in_met_sc = 100)
+
+

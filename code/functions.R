@@ -184,30 +184,37 @@ run_disease <- function(in_idata, in_mid_age, in_sex, in_disease)
 ##to the power transfomation of energy expenditure. 
 
 # ADD IN POWER INPUT FOR POWER TRANSFORMATION OF METS
-run_pif <- function(in_idata, i_irr, i_exposure, in_mid_age, in_sex, in_age, in_disease, in_met_sc) 
+run_pif <- function(in_idata, i_irr, i_exposure, in_mid_age, in_sex, in_disease, in_met_sc) 
 # 
 {
   
 ##Uncomment to debug function
-#   
-in_idata = idata
-i_irr = irr
-i_exposure = edata
-in_sex = "females"
-in_mid_age = 22
-in_disease = "ihd"
+
+# in_idata = idata
+# i_irr = irr
+# i_exposure = edata
+# in_sex = "females"
+# in_mid_age = 22
+# in_disease = "ihd"
 ###Filter data to use in pif calculations (age and sex). Add rrs, ee and calculations
 
 pif_df <- filter(in_idata, age >= in_mid_age & sex == in_sex) %>%
   select(sex, age)
 
-###Add varaibles to data.frame
+###Add varaibles to data.frame (different age category for breast cancer)
 
 pif_df$disease <- in_disease
+
+if(in_disease == "breast_cancer") {
 pif_df$age_cat [pif_df$age <=30] <- 30
 pif_df$age_cat [pif_df$age >30 & pif_df$age <=45 ] <- 45
 pif_df$age_cat [pif_df$age >45 & pif_df$age <=70 ] <- 70
+pif_df$age_cat [pif_df$age >70 & pif_df$age <=100 ] <- 80}
+else {
+pif_df$age_cat [pif_df$age <=30] <- 30
+pif_df$age_cat [pif_df$age >30 & pif_df$age <=70 ] <- 70
 pif_df$age_cat [pif_df$age >70 & pif_df$age <=100 ] <- 80
+
 pif_df$sex_cat <- ifelse(in_disease == "breast_cancer", "female", "female_male")
                      
 ##Create concatenated variables to match pif_df with i_irr
@@ -270,14 +277,7 @@ pif_df <-  inner_join(pif_df, i_exposure, by = c("sex_age_cat" = "sex_age_cat") 
                   pif_df$rr_insufficiently_active *pif_df$insufficiently_active +
                   pif_df$rr_recommended_level_active *pif_df$recommended_level_active +
                   pif_df$rr_highly_active *pif_df$highly_active)
-
- 
-##THE ISSUE HERE IS WITH THE PREVALENCE DATA FOR PA, I NEED TO ADD THIS TO THE DATAFRAME TO DO 
- ##THE COHORT CALCULATIONS, AS DONE WITH THE RRS. 
-
-
-
-
+}
 pif_df}
 
 
