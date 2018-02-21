@@ -24,8 +24,17 @@ edata <- read.csv("data/edata.csv", stringsAsFactors = F)
 irr <- read.csv("data/irr.csv", stringsAsFactors = F)
 ee <- read.csv("data/ee.csv", stringsAsFactors = F)
 
-#Parameters (here specify age groups, gender, intervention effect)
-##Prepare input data. Depends on data sources
+#################################Model parameters#########################################################################
+
+p_age_cohort <- c(22, 27, 32, 37, 42, 47, 52, 57, 62, 67, 72, 77, 82, 87, 92, 97)
+
+p_sex <- c("male", "female")
+
+###As an expample, an increase in 100 METs per week
+
+p_intervention_effect <- 100
+
+##############################Prepare general life table (age, death rate, population #)########
 
 ### Make lower cases values for sex column
 idata$sex <- tolower(idata$sex)
@@ -75,7 +84,9 @@ for (i in 1:20){
   start_index <- start_index + 5
 }
 
-#Generate life tables: general life table and disease specific life tables. 
+
+
+##########################Prepare general life table###########################################
 
 ## General lifetable. Starts from population numbers per one year interval and mortality rates
 ##mortaltiy rates = deaths (1-yr/people 1-yr)
@@ -87,10 +98,7 @@ for (i in 1:20){
 idata$qx <- ifelse(idata$age < 100, 1 - exp(-1 * idata$mx), 1)
 
 
-##General life table calculations: for cohorts, we need to set start and end age. 
-###May be best to move this at the begining of the code. 
-#### Assume start and end age specified by users
-##### For now we assume static values. I COMMENTED THIS MIDE AGE CALCULATIONS AS THESE 
+#####I COMMENTED THIS MID AGE CALCULATIONS AS THESE 
 ##### ARE NOT USED, BUT WE MAY NEED THEM TO DEFINE THE SCEANRIOS TO RUN AND NOT HAVE
 ##### CHANGE IN EACH FUNCTION
 
@@ -107,7 +115,11 @@ idata$qx <- ifelse(idata$age < 100, 1 - exp(-1 * idata$mx), 1)
 ####Loops or functions will be better here to generate all cohorts data for baseline and intervention at the same time and save values. 
 # In this case we are generating cohorts for females, mid_aged 27
 
-lt_df_females_bl <- run_cohorts(in_idata = idata, in_sex = "females", in_mid_age = 52)
+####Create empty data frames (16 age groups * 2 sex)
+
+# for (i in p_age_cohort & p-sex) {
+
+lt_df_females_bl <- run_life_table(in_idata = idata, in_sex = "females", in_mid_age = 52)
 
 
 ## Import *practice* scenario life table data (DELETE WHEN LIFE TABLE CALCS ARE INCLUDED)
@@ -131,7 +143,7 @@ sub_idata[sub_idata$sex == "females" ,]$pyld_rate <- sc_data[sc_data$age <= 100 
 
 # In this case we are generating cohorts for females, mid_aged 27
 
-lt_df_females_sc <- run_cohorts(in_idata = sub_idata, in_sex = "females", in_mid_age = 52)
+lt_df_females_sc <- run_life_table(in_idata = sub_idata, in_sex = "females", in_mid_age = 52)
 
 ##Disease life table: uses run_disease function, change function arguments to visualise other diseases
 

@@ -7,8 +7,9 @@
 require(dplyr)
 require(tidyverse)
 
+#############################Function for general life table###################################
 
-run_cohorts <- function(in_idata, in_sex, in_mid_age)
+run_life_table <- function(in_idata, in_sex, in_mid_age)
 {
   # Create a Life Table data frame
   
@@ -61,7 +62,7 @@ run_cohorts <- function(in_idata, in_sex, in_mid_age)
 }
 
 
-# Create disease Life Table data frame function
+#############################Function for disease life tables###################################
 
 run_disease <- function(in_idata, in_mid_age, in_sex, in_disease) 
   
@@ -177,13 +178,11 @@ run_disease <- function(in_idata, in_mid_age, in_sex, in_disease)
 }
 
 
-##Function to run disease potential impact fractions (PIFs)
-##The code for PIFs will depend on the data sources. 
-##Here I am creating cohort-pif function with RR (SE) and energy expenditure (METs per week). 
-##These data RR and energy expenditure is then used to fit a log linear function 
-##to the power transfomation of energy expenditure. 
+#############################Function for PIFs###################################
 
-# ADD IN POWER INPUT FOR POWER TRANSFORMATION OF METS
+##The code for PIFs will depend on the data sources. 
+ 
+
 run_pif <- function(in_idata, i_irr, i_exposure, in_mid_age, in_sex, in_disease, in_met_sc) 
 # 
 {
