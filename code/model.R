@@ -28,7 +28,7 @@ ee <- read.csv("data/ee.csv", stringsAsFactors = F)
 
 p_age_cohort <- c(22, 27, 32, 37, 42, 47, 52, 57, 62, 67, 72, 77, 82, 87, 92, 97)
 
-p_sex <- c("male", "female")
+p_sex <- c("males", "females")
 
 ###As an expample, an increase in 100 METs per week
 
@@ -97,20 +97,6 @@ for (i in 1:20){
 
 idata$qx <- ifelse(idata$age < 100, 1 - exp(-1 * idata$mx), 1)
 
-
-#####I COMMENTED THIS MID AGE CALCULATIONS AS THESE 
-##### ARE NOT USED, BUT WE MAY NEED THEM TO DEFINE THE SCEANRIOS TO RUN AND NOT HAVE
-##### CHANGE IN EACH FUNCTION
-
-# start cohort mid age
-# sc_age <- 30
-# 
-# # end cohort mid age
-# ec_age <- 34
-# 
-# # Specify cohort middle age
-# c_mid_age <- round(sum(sc_age, ec_age) / 2)
-
 ## Cohort specific age, data and sex settings
 ####Loops or functions will be better here to generate all cohorts data for baseline and intervention at the same time and save values. 
 # In this case we are generating cohorts for females, mid_aged 27
@@ -119,7 +105,19 @@ idata$qx <- ifelse(idata$age < 100, 1 - exp(-1 * idata$mx), 1)
 
 # for (i in p_age_cohort & p-sex) {
 
-lt_df_females_bl <- run_life_table(in_idata = idata, in_sex = "females", in_mid_age = 52)
+life_table_list <- list()
+index <- 1
+
+for (age in p_age_cohort){
+  for (sex in p_sex){
+    cat("age ", age, " and sex ", sex, "\n")
+    life_table_list[[index]] <- run_life_table(in_idata = idata, in_sex = sex, in_mid_age = age)
+    index <- index + 1
+  }
+}
+
+
+# lt_df_females_bl <- run_life_table(in_idata = idata, in_sex = "females", in_mid_age = 52)
 
 
 ## Import *practice* scenario life table data (DELETE WHEN LIFE TABLE CALCS ARE INCLUDED)
