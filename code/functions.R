@@ -88,6 +88,8 @@ run_disease <- function(in_idata, in_mid_age, in_sex, in_disease)
   dlt_df <- filter(in_idata, age >= in_mid_age & sex == in_sex) %>% 
     select(sex, age, dw_disease, incidence_disease, case_fatality_disease)
   
+  dlt_df$disease <- in_disease
+  
   #Create list of required columns
   ##Intermediate variables lx, qx, wx and vx
   ###lx
