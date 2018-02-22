@@ -116,6 +116,8 @@ for (age in p_age_cohort){
   }
 }
 
+###Uncommnet to check life table list
+# str(general_life_table_list_bl)
 
 ######################Generate baseline disease life tables##################################
 
@@ -132,6 +134,9 @@ for (age in p_age_cohort){
   }
 }
 
+###Uncommnet to check disease life table list
+# str(disease_life_table_list_bl)
+
 #######################Generate pifs#########################################################
 
 pifs <- list()
@@ -140,12 +145,17 @@ index <- 1
 for (age in p_age_cohort){
   for (sex in p_sex){
     for (disease in p_disease) {
-      cat("age ", age, " sex ", sex, "and disease", disease, "\n")
-      pifs[[index]] <- run_disease(in_idata = idata, in_sex = sex, in_mid_age = age, in_disease = disease)
+      for (effect in p_intervention_effect) {
+      cat("age ", age, " sex ", sex, "disease", disease, "and effect", effect,  "\n")
+      pifs[[index]] <- run_pif(in_idata = idata, i_irr = irr, i_exposure = edata, in_mid_age = age, in_sex = sex, in_disease = disease, in_met_sc = effect) 
       index <- index + 1
+      }
     }
   }
 }
+
+###Uncommnet to check pifs
+# str(pifs)
 
 # # lt_df_females_bl <- run_life_table(in_idata = idata, in_sex = "females", in_mid_age = 52)
 # 
