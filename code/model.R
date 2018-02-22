@@ -157,6 +157,23 @@ for (age in p_age_cohort){
 ###Uncommnet to check pifs
 # str(pifs)
 
+
+########################Sceanrio calculations####################################################
+
+######Create scenario disease life tables (incidence should change here)
+
+##Extract PIF values from pif lists
+pifs[[24]]
+
+##Create disease life table scenario and multiply incidence rate by (1-PIF)
+
+##DO WE NEED A LOOP HERE TO CREATE A SCENARIOS BY AGE, SEX AND DISEASE
+disease_life_table_list_sc <- disease_life_table_list_bl 
+
+disease_life_table_list_sc$incidence_disease_sc <- disease_life_table_list_bl$incidence_disease * (1-(pifs$pif))
+
+str(disease_life_table_list_sc)
+
 # # lt_df_females_bl <- run_life_table(in_idata = idata, in_sex = "females", in_mid_age = 52)
 # 
 # DELETE 
@@ -173,23 +190,5 @@ for (age in p_age_cohort){
 # 
 # sub_idata[sub_idata$sex == "females" ,]$pyld_rate <- sc_data[sc_data$age <= 100 & sc_data$sex == "female",]$sc_wx
 
-
-
-# ##Here we would need loops ove age and sex and storate results for baseline and scenario. 
-# ## General life talble: practice scenario's cohort specific age, data and sex settings. 
-# ## change function parameters to visualise other cohorts and sex. 
-# 
-# # In this case we are generating cohorts for females, mid_aged 27
-# 
-# lt_df_females_sc <- run_life_table(in_idata = sub_idata, in_sex = "females", in_mid_age = 52)
-
-##Disease life table: uses run_disease function, change function arguments to visualise other diseases
-# 
-# dlt_df_females_bl <- run_disease(in_idata = idata, in_sex = "females", in_mid_age = 32, in_disease = "ihd")
-# 
-# dlt_df_males_bl <- run_disease(in_idata = idata, in_sex = "males", in_mid_age = 32, in_disease = "ihd")
-# 
-# ##PIFs calculations (dataframe) (We applied a spline to derive RRs, which means that the results will be different to the excel)
-# pif <- run_pif(in_idata = idata , i_irr = irr, i_exposure = edata, in_mid_age = 42, in_sex = "females", in_disease = "diabetes", in_met_sc = 100)
 
 

@@ -178,7 +178,7 @@ run_disease <- function(in_idata, in_mid_age, in_sex, in_disease)
 }
 
 
-#############################Function for PIFs###################################
+#######################################Function for PIFs########################################
 
 ##The code for PIFs will depend on the data sources. 
 
@@ -281,5 +281,6 @@ run_pif <- function(in_idata, i_irr, i_exposure, in_mid_age, in_sex, in_disease,
   pif_df
   
   }
+
 
 
