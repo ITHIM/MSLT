@@ -196,7 +196,9 @@ run_pif <- function(in_idata, i_irr, i_exposure, in_mid_age, in_sex, in_disease,
   # i_exposure = edata
   # in_sex = "females"
   # in_mid_age = 22
-  # in_disease = "ihd"
+  # in_disease = "breast_cancer"
+  # in_met_sc <- effect
+  
   ###Filter data to use in pif calculations (age and sex). Add rrs, ee and calculations
   
   pif_df <- filter(in_idata, age >= in_mid_age & sex == in_sex) %>%
@@ -210,79 +212,81 @@ run_pif <- function(in_idata, i_irr, i_exposure, in_mid_age, in_sex, in_disease,
     pif_df$age_cat [pif_df$age <=30] <- 30
     pif_df$age_cat [pif_df$age >30 & pif_df$age <=45 ] <- 45
     pif_df$age_cat [pif_df$age >45 & pif_df$age <=70 ] <- 70
-    pif_df$age_cat [pif_df$age >70 & pif_df$age <=100 ] <- 80}
+    pif_df$age_cat [pif_df$age >70 & pif_df$age <=100 ] <- 80
+  }
   else {
     pif_df$age_cat [pif_df$age <=30] <- 30
     pif_df$age_cat [pif_df$age >30 & pif_df$age <=70 ] <- 70
     pif_df$age_cat [pif_df$age >70 & pif_df$age <=100 ] <- 80
-    
-    pif_df$sex_cat <- ifelse(in_disease == "breast_cancer", "female", "female_male")
-    
-    ##Create concatenated variables to match pif_df with i_irr
-    pif_df$sex_age_dis_cat <- paste(pif_df$disease,pif_df$age_cat, pif_df$sex_cat, sep = "_"  )
-    i_irr$sex_age_dis_cat <- paste(i_irr$disease,i_irr$age, i_irr$sex, sep = "_"  )
-    
-    # Remove sex, age and disease variables from i_irr df, as they are not needed
-    i_irr <- select(i_irr, -one_of('sex','age', 'disease'))
-    
-    ## The code below is working but copies age, sex and disease for x and y, how can this be avoided?
-    pif_df <-  inner_join(pif_df, i_irr, by = c("sex_age_dis_cat" = "sex_age_dis_cat") , copy = FALSE)
-    
-    ## Creation of splineFun which uses baseline's RR and EE to use to estimate intervention RRs
-    for (i in 1:nrow(pif_df)){
-      sp_obj <-  splinefun(y = c(pif_df$rr_inactive[i], 
-                                 pif_df$rr_insufficiently_active[i], 
-                                 pif_df$rr_recommended_level_active[i], 
-                                 pif_df$rr_highly_active[i]), 
-                           x = c(pif_df$ee_inactive[i], 
-                                 pif_df$ee_insufficiently_active[i], 
-                                 pif_df$ee_recommended_level_active[i], 
-                                 pif_df$ee_highly_active[i]), 
-                           method = "hyman")
-      
-      ## Use created spline function above to estimate intervention RRs
-      
-      pif_df$sc_rr_inactive[i] <- sp_obj(x = pif_df$ee_inactive[i] + in_met_sc)
-      pif_df$sc_rr_insufficiently_active[i] <-  sp_obj(x = pif_df$ee_insufficiently_active[i] + in_met_sc)
-      pif_df$sc_rr_recommended_level_active[i] <-  sp_obj(x = pif_df$ee_recommended_level_active[i] + in_met_sc)
-      pif_df$sc_rr_highly_active[i] <-  sp_obj(x = pif_df$ee_highly_active[i] + in_met_sc)
-      
-      # plot(sp_obj, xlab = "RR", ylab = "EE", main = paste("Spline ", i))
-    }
-    
-    
-    ## round sc_rr_highly_active column - it should be 1
-    pif_df$sc_rr_highly_active <- round(pif_df$sc_rr_highly_active)
-    
-    ##Calculate PIFs. I already process the data to generate categories in stata.
-    ##First add PA categories to pif_df
-    
-    pif_df$sex_age_cat <- paste(pif_df$sex, pif_df$age, sep = "_"  )
-    i_exposure$sex_age_cat <- paste(i_exposure$sex, i_exposure$age, sep = "_"  )
-    
-    # Remove sex, age and disease variables from i_irr df, as they are not needed
-    i_exposure <- select(i_exposure, -one_of('sex','age'))
-    
-    #Join edata (PA prevalence to pif_df)
-    
-    pif_df <-  inner_join(pif_df, i_exposure, by = c("sex_age_cat" = "sex_age_cat") , copy = FALSE)
-    
-    
-    ##We need to adapt to ITHIMR developments. REPLACE DATA FRAME FROM WHICH PREVALENCE OF PA IS TAKEN
-    
-    pif_df$pif <- 1-(pif_df$sc_rr_inactive *pif_df$inactive +
-                       pif_df$sc_rr_insufficiently_active*pif_df$insufficiently_active +
-                       pif_df$sc_rr_recommended_level_active*pif_df$recommended_level_active +
-                       pif_df$sc_rr_highly_active *pif_df$highly_active)/
-      (pif_df$rr_inactive *pif_df$inactive  +
-         pif_df$rr_insufficiently_active *pif_df$insufficiently_active +
-         pif_df$rr_recommended_level_active *pif_df$recommended_level_active +
-         pif_df$rr_highly_active *pif_df$highly_active)
   }
+  
+  pif_df$sex_cat <- ifelse(in_disease == "breast_cancer", "female", "female_male")
+  
+  ##Create concatenated variables to match pif_df with i_irr
+  pif_df$sex_age_dis_cat <- paste(pif_df$disease,pif_df$age_cat, pif_df$sex_cat, sep = "_"  )
+  i_irr$sex_age_dis_cat <- paste(i_irr$disease,i_irr$age, i_irr$sex, sep = "_"  )
+  
+  # Remove sex, age and disease variables from i_irr df, as they are not needed
+  i_irr <- select(i_irr, -one_of('sex','age', 'disease'))
+  
+  ## The code below is working but copies age, sex and disease for x and y, how can this be avoided?
+  pif_df <-  inner_join(pif_df, i_irr, by = c("sex_age_dis_cat" = "sex_age_dis_cat") , copy = FALSE)
+  
+  ## Creation of splineFun which uses baseline's RR and EE to use to estimate intervention RRs
+  for (i in 1:nrow(pif_df)){
+    sp_obj <-  splinefun(y = c(pif_df$rr_inactive[i], 
+                               pif_df$rr_insufficiently_active[i], 
+                               pif_df$rr_recommended_level_active[i], 
+                               pif_df$rr_highly_active[i]), 
+                         x = c(pif_df$ee_inactive[i], 
+                               pif_df$ee_insufficiently_active[i], 
+                               pif_df$ee_recommended_level_active[i], 
+                               pif_df$ee_highly_active[i]), 
+                         method = "hyman")
+    
+    ## Use created spline function above to estimate intervention RRs
+    
+    pif_df$sc_rr_inactive[i] <- sp_obj(x = pif_df$ee_inactive[i] + in_met_sc)
+    pif_df$sc_rr_insufficiently_active[i] <-  sp_obj(x = pif_df$ee_insufficiently_active[i] + in_met_sc)
+    pif_df$sc_rr_recommended_level_active[i] <-  sp_obj(x = pif_df$ee_recommended_level_active[i] + in_met_sc)
+    pif_df$sc_rr_highly_active[i] <-  sp_obj(x = pif_df$ee_highly_active[i] + in_met_sc)
+    
+    # plot(sp_obj, xlab = "RR", ylab = "EE", main = paste("Spline ", i))
+  }
+  
+  
+  ## round sc_rr_highly_active column - it should be 1
+  pif_df$sc_rr_highly_active <- round(pif_df$sc_rr_highly_active)
+  
+  ##Calculate PIFs. I already process the data to generate categories in stata.
+  ##First add PA categories to pif_df
+  
+  pif_df$sex_age_cat <- paste(pif_df$sex, pif_df$age, sep = "_"  )
+  i_exposure$sex_age_cat <- paste(i_exposure$sex, i_exposure$age, sep = "_"  )
+  
+  # Remove sex, age and disease variables from i_irr df, as they are not needed
+  i_exposure <- select(i_exposure, -one_of('sex','age'))
+  
+  #Join edata (PA prevalence to pif_df)
+  
+  pif_df <-  inner_join(pif_df, i_exposure, by = c("sex_age_cat" = "sex_age_cat") , copy = FALSE)
+  
+  
+  ##We need to adapt to ITHIMR developments. REPLACE DATA FRAME FROM WHICH PREVALENCE OF PA IS TAKEN
+  
+  pif_df$pif <- 1-(pif_df$sc_rr_inactive *pif_df$inactive +
+                     pif_df$sc_rr_insufficiently_active*pif_df$insufficiently_active +
+                     pif_df$sc_rr_recommended_level_active*pif_df$recommended_level_active +
+                     pif_df$sc_rr_highly_active *pif_df$highly_active)/
+    (pif_df$rr_inactive *pif_df$inactive  +
+       pif_df$rr_insufficiently_active *pif_df$insufficiently_active +
+       pif_df$rr_recommended_level_active *pif_df$recommended_level_active +
+       pif_df$rr_highly_active *pif_df$highly_active)
+  
   
   pif_df
   
-  }
+}
 
 
 
