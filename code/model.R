@@ -30,6 +30,8 @@ p_age_cohort <- c(22, 27, 32, 37, 42, 47, 52, 57, 62, 67, 72, 77, 82, 87, 92, 97
 
 p_sex <- c("males", "females")
 
+p_disease <- c("ihd", "istroke", "diabetes", "colon_cancer", "breast_cancer")
+
 ###As an expample, an increase in 100 METs per week
 
 p_intervention_effect <- 100
@@ -101,55 +103,83 @@ idata$qx <- ifelse(idata$age < 100, 1 - exp(-1 * idata$mx), 1)
 ####Loops or functions will be better here to generate all cohorts data for baseline and intervention at the same time and save values. 
 # In this case we are generating cohorts for females, mid_aged 27
 
-####Create empty data frames (16 age groups * 2 sex)
+########################Generate baseline general life tables##################################
 
-# for (i in p_age_cohort & p-sex) {
-
-life_table_list <- list()
+general_life_table_list_bl <- list()
 index <- 1
 
 for (age in p_age_cohort){
   for (sex in p_sex){
     cat("age ", age, " and sex ", sex, "\n")
-    life_table_list[[index]] <- run_life_table(in_idata = idata, in_sex = sex, in_mid_age = age)
+    general_life_table_list_bl[[index]] <- run_life_table(in_idata = idata, in_sex = sex, in_mid_age = age)
     index <- index + 1
   }
 }
 
 
-# lt_df_females_bl <- run_life_table(in_idata = idata, in_sex = "females", in_mid_age = 52)
+######################Generate baseline disease life tables##################################
+
+disease_life_table_list_bl <- list()
+index <- 1
+
+for (age in p_age_cohort){
+  for (sex in p_sex){
+    for (disease in p_disease) {
+    cat("age ", age, " sex ", sex, "and disease", disease, "\n")
+    disease_life_table_list_bl[[index]] <- run_disease(in_idata = idata, in_sex = sex, in_mid_age = age, in_disease = disease)
+    index <- index + 1
+    }
+  }
+}
+
+#######################Generate pifs#########################################################
+
+pifs <- list()
+index <- 1
+
+for (age in p_age_cohort){
+  for (sex in p_sex){
+    for (disease in p_disease) {
+      cat("age ", age, " sex ", sex, "and disease", disease, "\n")
+      pifs[[index]] <- run_disease(in_idata = idata, in_sex = sex, in_mid_age = age, in_disease = disease)
+      index <- index + 1
+    }
+  }
+}
+
+# # lt_df_females_bl <- run_life_table(in_idata = idata, in_sex = "females", in_mid_age = 52)
+# 
+# DELETE 
+# ## Import *practice* scenario life table data (DELETE WHEN LIFE TABLE CALCS ARE INCLUDED)
+# sc_data <- read.csv("data/sc_lf.csv", header = T, stringsAsFactors = F)
+# 
+# sub_idata <- filter(idata, age >= 22)
+# 
+# sub_idata[sub_idata$sex == "males" ,]$mx <- sc_data[sc_data$age <= 100 & sc_data$sex == "male",]$sc_mx
+# 
+# sub_idata[sub_idata$sex == "females" ,]$mx <- sc_data[sc_data$age <= 100 & sc_data$sex == "female",]$sc_mx
+# 
+# sub_idata[sub_idata$sex == "males" ,]$pyld_rate <- sc_data[sc_data$age <= 100 & sc_data$sex == "male",]$sc_wx
+# 
+# sub_idata[sub_idata$sex == "females" ,]$pyld_rate <- sc_data[sc_data$age <= 100 & sc_data$sex == "female",]$sc_wx
 
 
-## Import *practice* scenario life table data (DELETE WHEN LIFE TABLE CALCS ARE INCLUDED)
-sc_data <- read.csv("data/sc_lf.csv", header = T, stringsAsFactors = F)
 
-sub_idata <- filter(idata, age >= 22)
-
-sub_idata[sub_idata$sex == "males" ,]$mx <- sc_data[sc_data$age <= 100 & sc_data$sex == "male",]$sc_mx
-
-sub_idata[sub_idata$sex == "females" ,]$mx <- sc_data[sc_data$age <= 100 & sc_data$sex == "female",]$sc_mx
-
-sub_idata[sub_idata$sex == "males" ,]$pyld_rate <- sc_data[sc_data$age <= 100 & sc_data$sex == "male",]$sc_wx
-
-sub_idata[sub_idata$sex == "females" ,]$pyld_rate <- sc_data[sc_data$age <= 100 & sc_data$sex == "female",]$sc_wx
-
-
-
-##Here we would need loops ove age and sex and storate results for baseline and scenario. 
-## General life talble: practice scenario's cohort specific age, data and sex settings. 
-## change function parameters to visualise other cohorts and sex. 
-
-# In this case we are generating cohorts for females, mid_aged 27
-
-lt_df_females_sc <- run_life_table(in_idata = sub_idata, in_sex = "females", in_mid_age = 52)
+# ##Here we would need loops ove age and sex and storate results for baseline and scenario. 
+# ## General life talble: practice scenario's cohort specific age, data and sex settings. 
+# ## change function parameters to visualise other cohorts and sex. 
+# 
+# # In this case we are generating cohorts for females, mid_aged 27
+# 
+# lt_df_females_sc <- run_life_table(in_idata = sub_idata, in_sex = "females", in_mid_age = 52)
 
 ##Disease life table: uses run_disease function, change function arguments to visualise other diseases
-
-dlt_df_females_bl <- run_disease(in_idata = idata, in_sex = "females", in_mid_age = 32, in_disease = "ihd")
-
-dlt_df_males_bl <- run_disease(in_idata = idata, in_sex = "males", in_mid_age = 32, in_disease = "ihd")
-
-##PIFs calculations (dataframe) (We applied a spline to derive RRs, which means that the results will be different to the excel)
-pif <- run_pif(in_idata = idata , i_irr = irr, i_exposure = edata, in_mid_age = 42, in_sex = "females", in_disease = "diabetes", in_met_sc = 100)
+# 
+# dlt_df_females_bl <- run_disease(in_idata = idata, in_sex = "females", in_mid_age = 32, in_disease = "ihd")
+# 
+# dlt_df_males_bl <- run_disease(in_idata = idata, in_sex = "males", in_mid_age = 32, in_disease = "ihd")
+# 
+# ##PIFs calculations (dataframe) (We applied a spline to derive RRs, which means that the results will be different to the excel)
+# pif <- run_pif(in_idata = idata , i_irr = irr, i_exposure = edata, in_mid_age = 42, in_sex = "females", in_disease = "diabetes", in_met_sc = 100)
 
 
