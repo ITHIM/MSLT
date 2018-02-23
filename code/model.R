@@ -212,10 +212,14 @@ for (age in p_age_cohort){
         cat("\n")
       }
       else {
+        
         cat("age ", age, " sex ", sex, "and disease", disease, "\n")
-        disease_life_table_list_sc[[index]] <- run_disease(in_idata = idata, in_sex = sex, in_mid_age = age, in_disease = disease)
-        disease_life_table_list_sc[[index]]$incidence_disease <- incidence_sc[[index]]
-        disease_life_table_list_sc[[index]] <- run_disease(in_idata = idata, in_sex = sex, in_mid_age = age, in_disease = disease)
+        # modify idata's incidence for the said scenario
+        td <- idata
+        td[td$age >= age & td$sex == sex,][[paste("incidence", disease, sep = "_")]] <- incidence_sc[[index]]
+        
+        # Instead of idata, feed td to run scenarios
+        disease_life_table_list_sc[[index]] <- run_disease(in_idata = td, in_sex = sex, in_mid_age = age, in_disease = disease)
         disease_life_table_list_sc[[index]]$diff_inc_disease <- disease_life_table_list_sc[[index]]$incidence_disease - disease_life_table_list_bl[[index]]$incidence_disease
         disease_life_table_list_sc[[index]]$diff_prev_disease <- disease_life_table_list_sc[[index]]$px - disease_life_table_list_bl[[index]]$px
         disease_life_table_list_sc[[index]]$diff_mort_disease <- disease_life_table_list_sc[[index]]$mx - disease_life_table_list_bl[[index]]$mx
