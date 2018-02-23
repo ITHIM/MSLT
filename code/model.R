@@ -170,24 +170,55 @@ for (age in p_age_cohort){
 # str(pifs)
 
 
-########################Sceanrio calculations####################################################
+########################Scenario calculations####################################################
 
-######Create scenario disease life tables (incidence should change here)
+######Create scenario disease life tables (incidence should change here, so will the rest of the calcs)
 
-##Extract PIF values from pif lists
-pifs[[24]]
 
-##Create disease life table scenario and multiply incidence rate by (1-PIF)
 
-##DO WE NEED A LOOP HERE TO CREATE A SCENARIOS BY AGE, SEX AND DISEASE
-disease_life_table_list_sc <- disease_life_table_list_bl 
+disease_life_table_list_sc <- list()
+index <- 1
 
-## Modify individual incidence in disease life table list
-for (i in 1:length(disease_life_table_list_sc)){
-  cat("index ", i," \n")
-  disease_life_table_list_sc[[i]]$incidence_disease <-   disease_life_table_list_sc[[i]]$incidence_disease *
-                                                          (1-(pifs[[i]]$pif))
+# Create disease variable for the disease life table function (not incidence, as we want to use modified by pif)
+dw_disease <- paste("dw", in_disease, sep = "_")
+case_fatality_disease <- paste("case_fatality", in_disease, sep = "_")
+incidence_disease <- paste("incidence", in_disease, sep = "_")
+
+## Add generic variable names to the source data frame (in_idata)
+in_idata$dw_disease <- in_idata[[dw_disease]]
+in_idata$case_fatality_disease <- in_idata[[case_fatality_disease]]
+in_idata$incidence_disease <- in_idata[[incidence_disease]]
+
+## Filter in_idata by age and select columns for lifetable calculations
+disease_life_table_list_sc <- filter(in_idata = idata, age >= in_mid_age & sex == in_sex) %>% 
+  select(sex, age, dw_disease, case_fatality_disease, incidence_disease)
+
+##Replance basline incidence by mdified basline incidence by 1-pif
+
+# disease_life_table_list_sc[[index]]$incidence_disease <- disease_life_table_list_bl[[index]]$incidence_disease * (1-(pifs[[index]]$pif))
+
+disease_life_table_list_sc$incidence_disease <- disease_life_table_list_bl$incidence_disease * (1-(pifs$pif))
+
+for (age in p_age_cohort){
+  for (sex in p_sex){
+    for (disease in p_disease) {
+      # Exclude breast_cancer for Males
+      if (sex == "males" && disease == "breast_cancer"){
+        cat("\n")
+      }
+      else {
+        cat("age ", age, " sex ", sex, "and disease", disease, "\n")
+        disease_life_table_list_sc[[index]] <- run_disease(in_idata = idata, in_sex = sex, in_mid_age = age, in_disease = disease)
+        disease_life_table_list_sc[[index]]$diff_inc_disease <- disease_life_table_list_sc[[index]]$incidence_disease - disease_life_table_list_bl[[index]]$incidence_disease
+        disease_life_table_list_sc[[index]]$diff_prev_disease <- disease_life_table_list_sc[[index]]$px - disease_life_table_list_bl[[index]]$px
+        disease_life_table_list_sc[[index]]$diff_mort_disease <- disease_life_table_list_sc[[index]]$mx - disease_life_table_list_bl[[index]]$mx
+        
+        index <- index + 1
+      }
+    }
+  }
 }
 
-# See the first disease lifetable in viewer
 View(disease_life_table_list_sc[[1]])
+
+
