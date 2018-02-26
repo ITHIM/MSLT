@@ -6,6 +6,7 @@
 
 require(dplyr)
 require(tidyverse)
+require(stats)
 
 #############################Function for general life table###################################
 

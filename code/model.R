@@ -1,28 +1,32 @@
-  # Remove all variables
+  ##########################Prepare data and environment to run code###########################################################
+  
+  ##### Clean the Global Environment
   
   rm (list = ls())
   
-  ##To prevent scientific notation in data frame
+  ##### Prevent scientific notation in data frame
   
   options(scipen=999)
   
-  # Load all functions
+  ##### Load all functions
   
   source("code/functions.R")
   
-  ##Note that disease trends are excluded for now. We need to generate a trends function for diseases, mortality (all cause), 
-  ##change in disease due to change in risk factor exposure (discuss with Niel M), road injuries effect over time. 
-  ##Eventually, we want to add (1) CRA ITHIM approach to compare results and (2) use all cause mortaltiy instead of 
-  ##disease specific dose responses for incidence to understand the difference in results for all cause mortality. 
+  ##### Read data. idata: life table and disease life tables (including trends). edata: exposure data (e.g. physical activity).
+  #### irr.data: relative risks data and ee: energy expenditure
+  #### For exposure (edata) and input (idata) data I am using already generated categories, but a function should be developed to work from raw data. 
   
-  
-  # Read data. idata: life table and disease life tables (including trends). edata: exposure data (e.g. physical activity).
-  #irr.data: relative risks data and ee: energy expenditure
-  ##For exposure (edata) and input (idata) data I am using already generated categories, but a function should be developed to work from raw data. 
   idata <- read.csv("data/idata.csv", stringsAsFactors = F)
   edata <- read.csv("data/edata.csv", stringsAsFactors = F)
   irr <- read.csv("data/irr.csv", stringsAsFactors = F)
   ee <- read.csv("data/ee.csv", stringsAsFactors = F)
+  
+  #####To do
+  
+  ## Note that disease trends are excluded for now. We need to generate a trends function for diseases, mortality (all cause), 
+  ## change in disease due to change in risk factor exposure (discuss with Niel M), road injuries effect over time. 
+  ## Eventually, we want to add (1) CRA ITHIM approach to compare results and (2) use all cause mortaltiy instead of 
+  ## disease specific dose responses for incidence to understand the difference in results for all cause mortality. 
   
   #################################Model parameters#########################################################################
   
@@ -38,21 +42,25 @@
   
   ##############################Prepare general life table (age, death rate, population #)########
   
-  ### Make lower cases values for sex column
+  ##### Make lower cases values for sex column
+  
   idata$sex <- tolower(idata$sex)
   
-  ### Rename mortality_rate to mx
+  ##### Rename mortality_rate to mx
+  
   idata$mx <- idata$mortality_rate
   
-  ### Remove mortality_rate column
+  ##### Remove mortality_rate column
+  
   idata$mortality_rate <- NULL
   
-  ### Rename male for males and female for females in edata to match idata. 
+  ##### Rename male for males and female for females in edata to match idata. 
   
   edata$sex[edata$sex=="male"] <- "males"
   edata$sex[edata$sex=="female"] <- "females"
   
-  # Create new variable for 5_year population (age cohorts). Depends on the age-cohorts of interest (5-yrs here)
+  ##### Create new variable for 5_year population (age cohorts). Depends on the age-cohorts of interest (5-yrs here)
+  
   idata$five_year_population <- NA
   start_index <- 3
   index <- 1
@@ -88,23 +96,26 @@
   
   
   
+  ##### Generate list of general life tables (baseline and scenario), disease life tables (baseline and sceanrio),
+  ##### potential impact fraction (pif, one for now, number depends on interventions), and general and disease life
+  ##### tables for interventions. 
+  
   ##########################Prepare general life table###########################################
   
-  ## General lifetable. Starts from population numbers per one year interval and mortality rates
-  ##mortaltiy rates = deaths (1-yr/people 1-yr)
+  ##### General lifetable. Starts from population numbers per one year interval and mortality rates
+  ##### mortaltiy rates = deaths (1-yr/people 1-yr)
   
-  ### Create a new variable for the probability of dying between age now and now + 1
-  #### Formula = IF(age<100,1-EXP(-mortality rate),1)
+  ##### Create a new variable for the probability of dying between age now and now + 1
+  ##### Formula = IF(age<100,1-EXP(-mortality rate),1)
   
   
   idata$qx <- ifelse(idata$age < 100, 1 - exp(-1 * idata$mx), 1)
   
-  ## Cohort specific age, data and sex settings
-  ####Loops or functions will be better here to generate all cohorts data for baseline and intervention at the same time and save values. 
-  # In this case we are generating cohorts for females, mid_aged 27
+  ########################Generate baseline (bl) general life tables##################################
   
-  ########################Generate baseline general life tables##################################
-  
+  #### p_age_cohort and p_sex are defined parameters at the start of the code. Here, we generate a general
+  #### life table per age and sex. 
+
   general_life_table_list_bl <- list()
   index <- 1
   
@@ -116,10 +127,13 @@
     }
   }
   
-  ###Uncommnet to check life table list
-  # str(general_life_table_list_bl)
+  ##### Uncommnet to check life table list
+  # View(general_life_table_list_bl[[1]])
   
   ######################Generate baseline disease life tables##################################
+  
+  ##### p_age_cohort, p_sex and p_disease are defined parameters at the start of the code. Here, we generate a disease
+  ##### life table per age, sex and disease. 
   
   disease_life_table_list_bl <- list()
   index <- 1
@@ -140,10 +154,13 @@
     }
   }
   
-  ###Uncommnet to check disease life table list
-  # str(disease_life_table_list_bl)
+  ##### Uncommnet to check disease life table list
+  # View(disease_life_table_list_bl[[1]])
   
   #######################Generate pifs#########################################################
+  
+  ##### p_age_cohort, p_sex, p_disease and p_intervention_effect are defined parameters at the start of the code. 
+  ##### Here, we generate a pif per age, sex and disease.  
   
   pifs <- list()
   index <- 1
@@ -166,14 +183,17 @@
     }
   }
   
-  ###Uncommnet to check pifs
-  # str(pifs)
-  
+  ##### Uncommnet to check pifs
+  # View(pifs[[1]])
   
   ########################Scenario calculations####################################################
   
+  ##### The mechanism of change start with incidence in the disease life tables. Incidence is modified with 
+  ##### (1-PIF)
   
-  ####Generate scenario incidnece
+  
+  #####Generate scenario incidence (for each disease)
+  
   incidence_sc <- list()
   index <- 1
   
@@ -194,42 +214,77 @@
       }
     }
   }
-  View(incidence_sc[[1]])
+  
+  ##### Uncommnet to check scenario incidence
+  # View(incidence_sc[[1]])
   
   
-  ####Calculate disease life tables with new incidence
-  
+  ##### Calculate disease life tables with new incidence (this in turn, modifies prevalence and mortality)
   
   disease_life_table_list_sc <- list()
   index <- 1
 
 
-for (age in p_age_cohort){
-  for (sex in p_sex){
-    for (disease in p_disease) {
-      # Exclude breast_cancer for Males
-      if (sex == "males" && disease == "breast_cancer"){
-        cat("\n")
-      }
-      else {
-        
-        cat("age ", age, " sex ", sex, "and disease", disease, "\n")
-        # modify idata's incidence for the said scenario
-        td <- idata
-        td[td$age >= age & td$sex == sex,][[paste("incidence", disease, sep = "_")]] <- incidence_sc[[index]]
-        
-        # Instead of idata, feed td to run scenarios
-        disease_life_table_list_sc[[index]] <- run_disease(in_idata = td, in_sex = sex, in_mid_age = age, in_disease = disease)
-        disease_life_table_list_sc[[index]]$diff_inc_disease <- disease_life_table_list_sc[[index]]$incidence_disease - disease_life_table_list_bl[[index]]$incidence_disease
-        disease_life_table_list_sc[[index]]$diff_prev_disease <- disease_life_table_list_sc[[index]]$px - disease_life_table_list_bl[[index]]$px
-        disease_life_table_list_sc[[index]]$diff_mort_disease <- disease_life_table_list_sc[[index]]$mx - disease_life_table_list_bl[[index]]$mx
-        
-        index <- index + 1
+  for (age in p_age_cohort){
+    for (sex in p_sex){
+      for (disease in p_disease) {
+        # Exclude breast_cancer for Males
+        if (sex == "males" && disease == "breast_cancer"){
+          cat("\n")
+        }
+        else {
+          
+          cat("age ", age, " sex ", sex, "and disease", disease, "\n")
+          # modify idata's incidence for the said scenario
+          td <- idata
+          td[td$age >= age & td$sex == sex,][[paste("incidence", disease, sep = "_")]] <- incidence_sc[[index]]
+          
+          # Instead of idata, feed td to run scenarios
+          disease_life_table_list_sc[[index]] <- run_disease(in_idata = td, in_sex = sex, in_mid_age = age, in_disease = disease)
+          disease_life_table_list_sc[[index]]$diff_inc_disease <- disease_life_table_list_sc[[index]]$incidence_disease - disease_life_table_list_bl[[index]]$incidence_disease
+          disease_life_table_list_sc[[index]]$diff_prev_disease <- disease_life_table_list_sc[[index]]$px - disease_life_table_list_bl[[index]]$px
+          disease_life_table_list_sc[[index]]$diff_mort_disease <- disease_life_table_list_sc[[index]]$mx - disease_life_table_list_bl[[index]]$mx
+          
+          index <- index + 1
+        }
       }
     }
   }
-}
+  ##### Uncommnet to check scenario life tables
+  # View(disease_life_table_list_sc[[1]])
 
-View(disease_life_table_list_sc[[1]])
+  ##########################################Calculate new life table parameters###########################################
 
+  ####Generate scenario total mortality and prevalent YLDs (similar concept as with change in incidence feeding into sceanrio life table calculations)
+  ###CHECK IF THIS CODE IS ADDING THE CHANGE IN MORTALITY OVER ALL DISEASES
+  ##### Mortality rate scenarios (mx_sc)
 
+  mx_sc <- list()
+  index <- 1
+  
+  for (age in p_age_cohort){
+    for (sex in p_sex){
+          mx_sc[[index]] <- disease_life_table_list_bl[[index]]$mx + 
+          sapply(disease_life_table_list_sc[[index]]$diff_mort_disease, sum)
+          index <- index + 1
+    }         
+  }
+  
+  
+  ##### Uncommnet to check sceanrio mortality and changes 
+  View(mx_sc[[1]])
+  general_life_table_list_bl[[1]]$mx - mx_sc[[1]]
+  disease_life_table_list_sc[[1]]$diff_mort_disease
+
+  # ####Prevalence, THE CHANGE SHOULD BE IN YLDS, NEED TO INCORPORATE
+  # 
+  # px_sc <- list()
+  # index <- 1
+  # 
+  # for (age in p_age_cohort){
+  #   for (sex in p_sex){
+  #     px_sc[[index]] <- disease_life_table_list_bl[[index]]$px + disease_life_table_list_sc[[index]]$diff_mort_disease
+  #     index <- index + 1
+  #   }         
+  # }
+  # View(mx_sc[[1]])
