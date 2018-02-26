@@ -255,36 +255,28 @@
 
   ##########################################Calculate new life table parameters###########################################
 
-  ####Generate scenario total mortality and prevalent YLDs (similar concept as with change in incidence feeding into sceanrio life table calculations)
-  ###CHECK IF THIS CODE IS ADDING THE CHANGE IN MORTALITY OVER ALL DISEASES
+  ###Generate total change in mortality rate
   ##### Mortality rate scenarios (mx_sc)
 
-  mx_sc <- list()
+  mx_sc_total <- list()
   index <- 1
+
   
   for (age in p_age_cohort){
     for (sex in p_sex){
-          mx_sc[[index]] <- disease_life_table_list_bl[[index]]$mx + 
-          sapply(disease_life_table_list_sc[[index]]$diff_mort_disease, sum)
+      for (disease in p_disease) {
+      
+          mx_sc_total[[index]] <- reduce(disease_life_table_list_sc[[index]]$diff_mort_disease, sum)
+          
           index <- index + 1
-    }         
-  }
-  
+     
+             
+      }
+    }
+  }  
+
   
   ##### Uncommnet to check sceanrio mortality and changes 
-  View(mx_sc[[1]])
-  general_life_table_list_bl[[1]]$mx - mx_sc[[1]]
-  disease_life_table_list_sc[[1]]$diff_mort_disease
-
-  # ####Prevalence, THE CHANGE SHOULD BE IN YLDS, NEED TO INCORPORATE
-  # 
-  # px_sc <- list()
-  # index <- 1
-  # 
-  # for (age in p_age_cohort){
-  #   for (sex in p_sex){
-  #     px_sc[[index]] <- disease_life_table_list_bl[[index]]$px + disease_life_table_list_sc[[index]]$diff_mort_disease
-  #     index <- index + 1
-  #   }         
-  # }
-  # View(mx_sc[[1]])
+ View(mx_sc_total[[1]])
+  general_life_table_list_bl[[1]]$mx - mx_sc_total[[1]]
+  
