@@ -193,30 +193,30 @@
   
   
   #####Generate scenario incidence (for each disease)
+
+   incidence_sc <- list()
+   index <- 1
   
-  incidence_sc <- list()
-  index <- 1
+   for (age in p_age_cohort){
+     for (sex in p_sex){
+       for (disease in p_disease) {
   
-  for (age in p_age_cohort){
-    for (sex in p_sex){
-      for (disease in p_disease) {
-   
-          # Exclude breast_cancer for Males
-          if (sex == "males" && disease == "breast_cancer"){
-            cat("\n")
-          }
-          else {
-          
-            incidence_sc[[index]] <- disease_life_table_list_bl[[index]]$incidence_disease * (1-(pifs[[index]]$pif))
-            index <- index + 1
-          
-        }
-      }
-    }
-  }
+           # Exclude breast_cancer for Males
+           if (sex == "males" && disease == "breast_cancer"){
+             cat("\n")
+           }
+           else {
+  
+             incidence_sc[[index]] <- disease_life_table_list_bl[[index]]$incidence_disease * (1-(pifs[[index]]$pif))
+             index <- index + 1
+  
+         }
+       }
+     }
+   }
   
   ##### Uncommnet to check scenario incidence
-  # View(incidence_sc[[1]])
+View(incidence_sc[[1]])
   
   
   ##### Calculate disease life tables with new incidence (this in turn, modifies prevalence and mortality)
@@ -251,32 +251,79 @@
     }
   }
   ##### Uncommnet to check scenario life tables
-  # View(disease_life_table_list_sc[[1]])
+View(disease_life_table_list_sc[[1]])
+  
 
   ##########################################Calculate new life table parameters###########################################
 
   ###Generate total change in mortality rate
-  ##### Mortality rate scenarios (mx_sc)
+  ##### Sum mortality rate scenarios (mx_sc_total)
+  ####I TRIED TO CHANGE DISEASE LIFE TABLE FOR GENERAL LIFE TABLES BUT THIS IS NOT POSSIBLE 
+  ####BECAUSE OF THE DISEASE LOOP
 
   mx_sc_total <- list()
+  l_index <- 1
   index <- 1
-
+  
   
   for (age in p_age_cohort){
     for (sex in p_sex){
-      for (disease in p_disease) {
       
-          mx_sc_total[[index]] <- reduce(disease_life_table_list_sc[[index]]$diff_mort_disease, sum)
-          
+      mortality_sum <- NULL
+      create_new <- T
+      
+      for (disease in p_disease) {
+        if (sex == "males" && disease == "breast_cancer")
+          cat("\n")
+        else{
+          if (create_new){
+            mortality_sum <- select(disease_life_table_list_sc[[index]], c('age', 'sex'))
+            create_new <- F
+          }
+          mortality_sum$total <- disease_life_table_list_sc[[index]]$diff_mort_disease
           index <- index + 1
-     
-             
+        }
+        
+        cat(age, " - ", sex," - ",  disease," - ",  index, " - ", l_index,  "\n")
       }
+      mx_sc_total[[l_index]] <- mortality_sum
+      l_index <- l_index + 1
     }
   }  
+  
 
   
   ##### Uncommnet to check sceanrio mortality and changes 
- View(mx_sc_total[[1]])
-  general_life_table_list_bl[[1]]$mx - mx_sc_total[[1]]
-  
+View(mx_sc_total[[32]])
+
+
+
+
+
+
+  ###TO USE LATER TO GENERATE TOTALS 
+  # # Sum of columns
+  # 
+  # 
+  # for (age in p_age_cohort){
+  #   for (sex in p_sex){
+  #     
+  #     mortality_sum <- 0
+  #     
+  #     for (disease in p_disease) {
+  #       
+  #       
+  #       if (sex == "males" && disease == "breast_cancer")
+  #         cat("\n")
+  #       else{
+  #         mortality_sum <- mortality_sum + sum(disease_life_table_list_sc[[index]]$diff_mort_disease)
+  #         # mx_sc_total[[index]] <- reduce(disease_life_table_list_sc[[index]]$diff_mort_disease, sum)
+  #         index <- index + 1
+  #       }
+  #       
+  #       cat(age, " - ", sex," - ",  disease," - ",  index, "\n")
+  #     }
+  #     mx_sc_total[[l_index]] <- mortality_sum
+  #     l_index <- l_index + 1
+  #   }
+  # }    
