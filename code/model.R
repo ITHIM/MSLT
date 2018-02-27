@@ -264,29 +264,32 @@ View(incidence_sc[[1]])
   mx_sc_total <- list()
   l_index <- 1
   index <- 1
-  
-  
   for (age in p_age_cohort){
     for (sex in p_sex){
-      
       mortality_sum <- NULL
       create_new <- T
       
       for (disease in p_disease) {
-        if (sex == "males" && disease == "breast_cancer")
+        if (sex == "males" && disease == "breast_cancer"){
           cat("\n")
-        else{
+        }else{
+          
           if (create_new){
             mortality_sum <- select(disease_life_table_list_sc[[index]], c('age', 'sex'))
+            mortality_sum$total <- 0
+          }else{
             create_new <- F
           }
-          mortality_sum$total <- (disease_life_table_list_sc[[index]]$diff_mort_disease)
+          
+          mortality_sum$total <- mortality_sum$total + (disease_life_table_list_sc[[index]]$diff_mort_disease)
+          
+          cat(age, " - ", sex," - ",  disease," - ",  index, " - ", l_index,  "\n")
+          
           index <- index + 1
         }
         
-        cat(age, " - ", sex," - ",  disease," - ",  index, " - ", l_index,  "\n")
       }
-      mx_sc_total[[l_index]] <- mortality_sum$total
+      mx_sc_total[[l_index]] <- mortality_sum
       l_index <- l_index + 1
     }
   }  
