@@ -244,6 +244,8 @@ View(incidence_sc[[1]])
           disease_life_table_list_sc[[index]]$diff_inc_disease <- disease_life_table_list_sc[[index]]$incidence_disease - disease_life_table_list_bl[[index]]$incidence_disease
           disease_life_table_list_sc[[index]]$diff_prev_disease <- disease_life_table_list_sc[[index]]$px - disease_life_table_list_bl[[index]]$px
           disease_life_table_list_sc[[index]]$diff_mort_disease <- disease_life_table_list_sc[[index]]$mx - disease_life_table_list_bl[[index]]$mx
+          disease_life_table_list_sc[[index]]$diff_pylds_disease <- (disease_life_table_list_sc[[index]]$px - disease_life_table_list_bl[[index]]$px) * disease_life_table_list_bl[[index]]$dw_disease
+          
           
           index <- index + 1
         }
@@ -251,7 +253,7 @@ View(incidence_sc[[1]])
     }
   }
   ##### Uncommnet to check scenario life tables
-  # View(disease_life_table_list_sc[[1]])
+View(disease_life_table_list_sc[[1]])
 
 
   ##########################################Calculate new life table parameters###########################################
@@ -293,16 +295,10 @@ View(incidence_sc[[1]])
     }
   }  
   
-
-  
   ##### Uncommnet to check sceanrio mortality and changes 
-  View(mx_sc_total[[2]])
+  # View(mx_sc_total[[2]])
   ####Cross check total difference in disease mortality with total added up in mx_sc_total
-  View(disease_life_table_list_sc[[5]]$diff_mort_disease)
-  View(disease_life_table_list_sc[[6]]$diff_mort_disease)
-  View(disease_life_table_list_sc[[7]]$diff_mort_disease)
-  View(disease_life_table_list_sc[[8]]$diff_mort_disease)
-  View(disease_life_table_list_sc[[9]]$diff_mort_disease)
+
   
   
   
