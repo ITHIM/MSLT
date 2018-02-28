@@ -38,7 +38,7 @@
   
   ###As an expample, an increase in 1000 MET-mins per week
   
-  p_intervention_effect <- 1000
+  p_intervention_effect <- 100
   
   ##############################Prepare general life table (age, death rate, population #)########
   
@@ -237,7 +237,7 @@
           cat("age ", age, " sex ", sex, "and disease", disease, "\n")
           # modify idata's incidence for the said scenario
           td1 <- idata
-          td1[td$age >= age & td$sex == sex,][[paste("incidence", disease, sep = "_")]] <- incidence_sc[[index]]
+          td1[td1$age >= age & td1$sex == sex,][[paste("incidence", disease, sep = "_")]] <- incidence_sc[[index]]
           
           # Instead of idata, feed td to run scenarios
           disease_life_table_list_sc[[index]] <- run_disease(in_idata = td1, in_sex = sex, in_mid_age = age, in_disease = disease)
