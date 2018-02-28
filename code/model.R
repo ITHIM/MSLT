@@ -36,9 +36,9 @@
   
   p_disease <- c("ihd", "istroke", "diabetes", "colon_cancer", "breast_cancer")
   
-  ###As an expample, an increase in 100 METs per week
+  ###As an expample, an increase in 1000 MET-mins per week
   
-  p_intervention_effect <- 100
+  p_intervention_effect <- 1000
   
   ##############################Prepare general life table (age, death rate, population #)########
   
@@ -155,7 +155,7 @@
   }
   
   ##### Uncommnet to check disease life table list
-  # View(disease_life_table_list_bl[[1]])
+# View(disease_life_table_list_bl[[1]])
   
   #######################Generate pifs#########################################################
   
@@ -216,8 +216,8 @@
    }
   
   ##### Uncommnet to check scenario incidence
-View(incidence_sc[[1]])
-  
+# View(incidence_sc[[1]])
+   
   
   ##### Calculate disease life tables with new incidence (this in turn, modifies prevalence and mortality)
   
@@ -236,11 +236,11 @@ View(incidence_sc[[1]])
           
           cat("age ", age, " sex ", sex, "and disease", disease, "\n")
           # modify idata's incidence for the said scenario
-          td <- idata
-          td[td$age >= age & td$sex == sex,][[paste("incidence", disease, sep = "_")]] <- incidence_sc[[index]]
+          td1 <- idata
+          td1[td$age >= age & td$sex == sex,][[paste("incidence", disease, sep = "_")]] <- incidence_sc[[index]]
           
           # Instead of idata, feed td to run scenarios
-          disease_life_table_list_sc[[index]] <- run_disease(in_idata = td, in_sex = sex, in_mid_age = age, in_disease = disease)
+          disease_life_table_list_sc[[index]] <- run_disease(in_idata = td1, in_sex = sex, in_mid_age = age, in_disease = disease)
           disease_life_table_list_sc[[index]]$diff_inc_disease <- disease_life_table_list_sc[[index]]$incidence_disease - disease_life_table_list_bl[[index]]$incidence_disease
           disease_life_table_list_sc[[index]]$diff_prev_disease <- disease_life_table_list_sc[[index]]$px - disease_life_table_list_bl[[index]]$px
           disease_life_table_list_sc[[index]]$diff_mort_disease <- disease_life_table_list_sc[[index]]$mx - disease_life_table_list_bl[[index]]$mx
@@ -256,7 +256,7 @@ View(incidence_sc[[1]])
   # View(disease_life_table_list_sc[[1]])
 
 
-  ##########################################Calculate new life table parameters###########################################
+  ##########################################Calculate scenario general life table parameters###########################################
 
   #####Generate total change in mortality rate
   ##### Sum mortality rate scenarios (mx_sc_total)
@@ -289,13 +289,13 @@ View(incidence_sc[[1]])
         }
         
       }
-      mx_sc_total[[l_index]] <- mortality_sum
+      mx_sc_total[[l_index]] <- mortality_sum 
       l_index <- l_index + 1
     }
   }  
   
   ##### Uncommnet to check sceanrio mortality and changes 
-  # View(mx_sc_total[[2]])
+ # View(mx_sc_total[[1]])
   
 
   #####Generate total change in prevalent yld rates
@@ -337,8 +337,42 @@ View(incidence_sc[[1]])
   ##### Uncommnet to check scenario pyld change
   # View(pylds_sc_total[[2]])
 
-
-
+  ##### Calculate general life tables with modified mortality and pylds total#############################
+  ###Original mortality rate is modified by the mx_sc_total (total change in mortality from diseases)
+  ###Original pyld rate is modified by the change in each disease pylds
+  
+  
+  general_life_table_list_sc <- list()
+  index <- 1
+  
+  
+  for (age in p_age_cohort){
+    for (sex in p_sex){
+     
+          
+          cat("age ", age, " and sex ", sex, "\n")
+          # modify idata's mortality and pyld total for the said scenario
+          td2 <- idata
+          td2[td2$age >= age & td2$sex == sex,][[paste("mx")]] <- general_life_table_list_bl[[index]]$mx + mx_sc_total[[index]]$total
+          td2[td2$age >= age & td2$sex == sex,][[paste("pyld_rate")]] <- general_life_table_list_bl[[index]]$pyld_rate + pylds_sc_total[[index]]$total
+          
+          
+          # Instead of idata, feed td to run scenarios
+          general_life_table_list_sc[[index]] <- run_life_table(in_idata = td2, in_sex = sex, in_mid_age = age)
+         
+          
+          
+          index <- index + 1
+        
+      
+    }
+  }
+  ##### Uncommnet to check scenario life tables
+  View(general_life_table_list_sc[[32]])
+  View(general_life_table_list_bl[[32]])
+  
+  
+  
   ###TO USE LATER TO GENERATE TOTALS 
   # # Sum of columns
   # 
