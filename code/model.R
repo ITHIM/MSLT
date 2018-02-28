@@ -253,15 +253,14 @@ View(incidence_sc[[1]])
     }
   }
   ##### Uncommnet to check scenario life tables
-View(disease_life_table_list_sc[[1]])
+  # View(disease_life_table_list_sc[[1]])
 
 
   ##########################################Calculate new life table parameters###########################################
 
-  ###Generate total change in mortality rate
+  #####Generate total change in mortality rate
   ##### Sum mortality rate scenarios (mx_sc_total)
-  ####THE FUNCTION IS ONLY PICKING UP THE CHANGE IN THE LAST DISEASE IN THE INDEX (colon cancer), 
-  ####IT IS NOT SUMMING UP ALL CHANGES
+
 
   mx_sc_total <- list()
   l_index <- 1
@@ -297,52 +296,47 @@ View(disease_life_table_list_sc[[1]])
   
   ##### Uncommnet to check sceanrio mortality and changes 
   # View(mx_sc_total[[2]])
-  ####Cross check total difference in disease mortality with total added up in mx_sc_total
+  
 
-  
-  
-  
-  
-  ####WIP
   #####Generate total change in prevalent yld rates
-  #####total ylds rate + (sum-all diseases change in prevelence*total yld rate)
+  #####total ylds rate= sum (change prevalence disease*dw)
 
 
-#   pyld_rate_sc_total <- list()
-#   l_index <- 1
-#   index <- 1
-# 
-# 
-#   for (age in p_age_cohort){
-#     for (sex in p_sex){
-#     
-#       pyld_rate_sum <- NULL
-#       create_new <- T
-#     
-#     for (disease in p_disease) {
-#       if (sex == "males" && disease == "breast_cancer")
-#         cat("\n")
-#       else{
-#         if (create_new){
-#           pyld_rate_sum <- select(disease_life_table_list_sc[[index]], c('age', 'sex'))
-#           create_new <- F
-#         }
-#         pyld_rate_sum$total <- (disease_life_table_list_sc[[index]]$diff_prev_disease)*
-#           general_life_table_list_bl[[index]]$pyld_rate
-#         index <- index + 1
-#       }
-#       
-#       cat(age, " - ", sex," - ",  disease," - ",  index, " - ", l_index,  "\n")
-#     }
-#       pyld_rate_sc_total[[l_index]] <-  pyld_rate_sum
-#     l_index <- l_index + 1
-#   }
-# }  
-# 
-# 
-# 
-# ##### Uncommnet to check sceanrio mortality and changes 
-# View(pyld_rate_sc_total[[32]])
+  pylds_sc_total <- list()
+  l_index <- 1
+  index <- 1
+  for (age in p_age_cohort){
+    for (sex in p_sex){
+      pylds_sum <- NULL
+      create_new <- T
+      
+      for (disease in p_disease) {
+        if (sex == "males" && disease == "breast_cancer"){
+          cat("\n")
+        }else{
+          
+          if (create_new){
+            pylds_sum <- select(disease_life_table_list_sc[[index]], c('age', 'sex'))
+            pylds_sum$total <- 0
+            create_new <- F
+            pylds_sum$total <- pylds_sum$total + (disease_life_table_list_sc[[index]]$diff_pylds_disease)
+          }else{
+            pylds_sum$total <- pylds_sum$total + (disease_life_table_list_sc[[index]]$diff_pylds_disease)
+          }
+          
+          cat(age, " - ", sex," - ",  disease," - ",  index, " - ", l_index,  "\n")
+          index <- index + 1
+        }
+        
+      }
+      pylds_sc_total[[l_index]] <- pylds_sum
+      l_index <- l_index + 1
+    }
+  }  
+  
+  ##### Uncommnet to check scenario pyld change
+  # View(pylds_sc_total[[2]])
+
 
 
   ###TO USE LATER TO GENERATE TOTALS 
