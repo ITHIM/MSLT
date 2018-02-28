@@ -277,14 +277,13 @@ View(incidence_sc[[1]])
           if (create_new){
             mortality_sum <- select(disease_life_table_list_sc[[index]], c('age', 'sex'))
             mortality_sum$total <- 0
-          }else{
             create_new <- F
+            mortality_sum$total <- mortality_sum$total + (disease_life_table_list_sc[[index]]$diff_mort_disease)
+          }else{
+            mortality_sum$total <- mortality_sum$total + (disease_life_table_list_sc[[index]]$diff_mort_disease)
           }
           
-          mortality_sum$total <- mortality_sum$total + (disease_life_table_list_sc[[index]]$diff_mort_disease)
-          
           cat(age, " - ", sex," - ",  disease," - ",  index, " - ", l_index,  "\n")
-          
           index <- index + 1
         }
         
