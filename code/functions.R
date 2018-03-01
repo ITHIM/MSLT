@@ -289,6 +289,88 @@ run_pif <- function(in_idata, i_irr, i_exposure, in_mid_age, in_sex, in_disease,
   
 }
 
+################################Functions to generate outputs##############################################
+
+####Function to generate difference in incidence numbers and deaths. start with generating data frames
+####then add specification of graphs, years included.
+
+#in_data= idata, initial data set
+#in_data_bl_lt= baseline life table. in_data_sc_lt=scenario life table. in_data_bl_disease=disease baseline life table
+#in_data_sc_disease=disease scenario life table
+
+run_output_burden <- function(in_data, in_data_bl_lt, in_data_sc_lt, in_data_bl_disease, in_data_sc_disease, in_sex, in_age, in_disease)
+
+  {
+
+
+  run_output_burden_df <- filter(in_idata, age >= in_mid_age & sex == in_sex) %>%
+    select(sex, age)
+
+
+run_output_burden_df$disease <- in_disease
+
+
+run_output_burden_df <- list()
+l_index <- 1
+index <- 1
+
+for (age in p_age_cohort){
+  for (sex in p_sex){
+    output <- NULL
+    create_new <- T
+    
+    for (disease in p_disease) {
+      if (sex == "males" && disease == "breast_cancer"){
+        cat("\n")
+      }else{
+        
+        if (create_new){
+          output <- select(disease_life_table_list_sc[[index]], c('age', 'sex'))
+          output$Lx_bl <- 0
+          create_new <- F
+          pylds_sum$total <- pylds_sum$total + (disease_life_table_list_sc[[index]]$diff_pylds_disease)
+        }else{
+          pylds_sum$total <- pylds_sum$total + (disease_life_table_list_sc[[index]]$diff_pylds_disease)
+        }
+        
+        cat(age, " - ", sex," - ",  disease," - ",  index, " - ", l_index,  "\n")
+        index <- index + 1
+      }
+      
+    }
+    pylds_sc_total[[l_index]] <- pylds_sum
+    l_index <- l_index + 1
+  }
+}  
+
+###Life years from
+
+run_output_burden_df$LY_bl <- 0
+run_output_burden_df$LY_sc <- 0
+
+# Create disease variable for the disease life table function
+incidence_disease_bl <- paste("incidence_bl", in_disease, sep = "_")
+mx_disease_bl <- paste("mx_bl", in_disease, sep = "_")
+incidence_disease_sc <- paste("incidence_sc", in_disease, sep = "_")
+mx_disease_sc <- paste("mx_sc", in_disease, sep = "_")
+
+
+## Add generic variable names to the source data frame (in_idata)
+
+in_idata$incidence_disease_bl <- in_idata[[incidence_disease_bl]]
+in_idata$mx_disease_bl <- in_idata[[mx_disease_bl]]
+in_idata$incidence_disease_sc <- in_idata[[incidence_disease_sc]]
+in_idata$mx_disease_sc <- in_idata[[mx_disease_sc]]
+
+
+for (i in 1:nrow(run_output_burden_df)){
+  run_output_burden_dff$LY_bl   <- in_data_bl_lt$Lx
+  run_output_burden_df$LY_sc <-  in_data_sc_lt$Lx
+
+}
+}
+
+
 
 
 
