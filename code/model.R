@@ -350,6 +350,8 @@ for (age in p_age_cohort){
   for (sex in p_sex){
     
     
+    
+    
     cat("age ", age, " and sex ", sex, "\n")
     # modify idata's mortality and pyld total for the said scenario
     td2 <- idata
@@ -370,6 +372,72 @@ for (age in p_age_cohort){
 ##### Uncommnet to check scenario life tables
 View(general_life_table_list_sc[[32]])
 View(general_life_table_list_bl[[32]])
+
+
+output_burden <- list()
+l_index <- 1
+index <- 1
+for (age in p_age_cohort){
+  for (sex in p_sex){
+    create_new <- T
+    for (disease in p_disease) {
+      if (sex == "males" && disease == "breast_cancer"){
+        cat("\n")
+      }else{
+        
+        # disease_life_table_list_sc and disease_life_table_list_bl (incidence_disease and mx)
+        
+        
+        if (create_new){
+          output_burden_sc <- select(disease_life_table_list_sc[[index]], c('age', 'sex', 'incidence_disease', 'mx'))
+          names(output_burden_sc)[names(output_burden_sc) == 'incidence_disease'] <- paste('incidence_disease', disease, "sc", sep = "_")
+          names(output_burden_sc)[names(output_burden_sc) == 'mx'] <- paste('mx', disease, "sc", sep = "_")
+          #rename(output_burden_sc, paste('incidence_disease', disease, "sc", sep = "_") = incidence_disease)
+          #rename(output_burden_sc, paste('mx', disease, "sc", sep = "_") = mx)
+          output_burden_bl <- select(disease_life_table_list_bl[[index]], c('incidence_disease', 'mx'))
+          names(output_burden_bl)[names(output_burden_bl) == 'incidence_disease'] <- paste('incidence_disease', disease, "bl", sep = "_")
+          names(output_burden_bl)[names(output_burden_bl) == 'mx'] <- paste('mx', disease, "bl", sep = "_")
+          #rename(output_burden_bl, paste('incidence_disease', disease, "bl", "_") = incidence_disease)
+          #rename(output_burden_bl, paste('mx', disease, "bl", sep = "_") = mx)
+          output_burden_sc <- cbind(output_burden_sc, output_burden_bl)
+          create_new <- F
+        }else{
+          
+          td3 <- select(disease_life_table_list_sc[[index]], c('incidence_disease', 'mx'))
+          names(td3)[names(td3) == 'incidence_disease'] <- paste('incidence_disease', disease, "sc", sep = "_")
+          names(td3)[names(td3) == 'mx'] <- paste('mx', disease, "sc", sep = "_")
+
+          td4 <- select(disease_life_table_list_bl[[index]], c('incidence_disease', 'mx'))
+          names(td4)[names(td4) == 'incidence_disease'] <- paste('incidence_disease', disease, "bl", sep = "_")
+          names(td4)[names(td4) == 'mx'] <- paste('mx', disease, "bl", sep = "_")
+          #rename(td4, paste(incidence_disease, disease, "bl", "_") = incidence_disease)
+          #rename(td4, paste(mx, disease, "bl", sep = "_") = mx)
+          
+          output_burden_sc <- cbind(output_burden_sc, td3)
+          output_burden_sc <- cbind(output_burden_sc, td4)
+          
+        }
+        
+        cat(age, " - ", sex," - ",  disease," - ",  index, " - ", l_index,  "\n")
+        index <- index + 1
+      }
+      
+    }
+    
+    # general_life_table_list_sc and general_life_table_list_bl (Lx)
+    output_burden_lf_sc <- select(general_life_table_list_sc[[l_index]], Lx)
+    names(output_burden_lf_sc)[names(output_burden_lf_sc) == 'Lx'] <- paste('Lx', "sc", sep = "_")
+    
+    output_burden_lf_bl <- select(general_life_table_list_bl[[l_index]], Lx)
+    names(output_burden_lf_bl)[names(output_burden_lf_bl) == 'Lx'] <- paste('Lx', "bl", sep = "_")
+    
+    output_burden_sc <- cbind(output_burden_sc, output_burden_lf_sc)
+    output_burden_sc <- cbind(output_burden_sc, output_burden_lf_bl)
+    output_burden[[l_index]] <- output_burden_sc
+    l_index <- l_index + 1
+  }
+}
+
 
 
 #####################Outputs#####################################
