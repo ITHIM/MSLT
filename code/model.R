@@ -407,12 +407,25 @@ for (age in p_age_cohort){
           
           ####New list to add calculations/not pasting the disease names propertly
           
-          output_burden_change <- list(inc_num_bl, inc_num_sc, mx_num_bl, mx_num_sc)
+          output_burden_change <- list()
           
-          inc_num_bl <- paste("inc_num_bl", disease, sep = "-")
-          inc_num_sc <- paste("inc_num_sc", disease, sep = "-")
-          mx_num_bl <- paste("inc_num_mx", disease, sep = "-")
-          mx_num_sc <- paste("inc_num_mx", disease, sep = "-")
+          output_burden_change$inc_num_bl <- 0
+          output_burden_change$inc_num_sc <- 0
+          output_burden_change$inc_num_diff <- 0
+          
+          output_burden_change$mx_num_bl <- 0
+          output_burden_change$mx_num_sc <- 0
+          output_burden_change$mx_num_diff <- 0
+          
+           names(output_burden_change)[names(output_burden_change) == 'inc_num_bl'] <- paste('inc_num_bl', disease, sep = "_")
+           names(output_burden_change)[names(output_burden_change) == 'inc_num_sc'] <- paste('inc_num_sc', disease, sep = "_")
+           names(output_burden_change)[names(output_burden_change) == 'inc_num_diff'] <- paste('inc_num_diff', disease, sep = "_")
+           names(output_burden_change)[names(output_burden_change) == 'mx_num_bl'] <- paste('mx_num_bl', disease, sep = "_")
+           names(output_burden_change)[names(output_burden_change) == 'mx_num_sc'] <- paste('mx_num_sc', disease, sep = "_")
+           names(output_burden_change)[names(output_burden_change) == 'mx_num_diff'] <- paste('mx_num_diff', disease, sep = "_")
+           
+
+          ###Bind all lists
         
           output_burden_sc <- cbind(output_burden_sc, output_burden_bl)
           output_burden_sc <- cbind(output_burden_sc, output_burden_change)
@@ -434,12 +447,27 @@ for (age in p_age_cohort){
           names(td4)[names(td4) == 'mx'] <- paste('mx', disease, "bl", sep = "_")
           names(td4)[names(td4) == 'px'] <- paste('px', disease, "bl", sep = "_")
          
-          output_burden_change2 <- list(inc_num_bl, inc_num_sc, mx_num_bl, mx_num_sc)
+          ####New list to add calculations/not pasting the disease names propertly
           
-          inc_num_bl <- paste("inc_num_bl", disease, sep = "-")
-          inc_num_sc <- paste("inc_num_sc", disease, sep = "-")
-          mx_num_bl <- paste("inc_num_mx", disease, sep = "-")
-          mx_num_sc <- paste("inc_num_mx", disease, sep = "-")
+          output_burden_change2 <- list()
+          
+          output_burden_change2$inc_num_bl <- 0
+          output_burden_change2$inc_num_sc <- 0
+          output_burden_change2$inc_num_diff <- 0
+          
+          output_burden_change2$mx_num_bl <- 0
+          output_burden_change2$mx_num_sc <- 0
+          output_burden_change2$mx_num_diff <- 0
+          
+          names(output_burden_change2)[names(output_burden_change2) == 'inc_num_bl'] <- paste('inc_num_bl', disease, sep = "_")
+          names(output_burden_change2)[names(output_burden_change2) == 'inc_num_sc'] <- paste('inc_num_sc', disease, sep = "_")
+          names(output_burden_change2)[names(output_burden_change2) == 'inc_num_diff'] <- paste('inc_num_diff', disease, sep = "_")
+          names(output_burden_change2)[names(output_burden_change2) == 'mx_num_bl'] <- paste('mx_num_bl', disease, sep = "_")
+          names(output_burden_change2)[names(output_burden_change2) == 'mx_num_sc'] <- paste('mx_num_sc', disease, sep = "_")
+          names(output_burden_change2)[names(output_burden_change2) == 'mx_num_diff'] <- paste('mx_num_diff', disease, sep = "_")
+          
+          
+          ###Bind all lists
           
           output_burden_sc <- cbind(output_burden_sc, td3)
           output_burden_sc <- cbind(output_burden_sc, td4)
@@ -462,6 +490,63 @@ for (age in p_age_cohort){
     
     output_burden_sc <- cbind(output_burden_sc, output_burden_lf_sc)
     output_burden_sc <- cbind(output_burden_sc, output_burden_lf_bl)
+    
+
+
+  ###Complete empty variables with values (IS THERE A BETTER WAY OF DOING THIS??, LOOP, need to work out changes in disease name and paste in name)
+  
+
+    ###IHD
+    output_burden_sc$inc_num_bl_ihd <- output_burden_sc$incidence_disease_ihd_bl *(1 - output_burden_sc$px_ihd_bl)  * output_burden_sc$Lx_bl
+    output_burden_sc$inc_num_sc_ihd <- output_burden_sc$incidence_disease_ihd_sc *(1 - output_burden_sc$px_ihd_sc)  * output_burden_sc$Lx_sc
+    output_burden_sc$inc_num_diff_ihd <- output_burden_sc$inc_num_bl_ihd - output_burden_sc$inc_num_sc_ihd
+
+    output_burden_sc$mx_num_bl_ihd <- output_burden_sc$mx_ihd_bl  * output_burden_sc$Lx_bl
+    output_burden_sc$mx_num_sc_ihd <- output_burden_sc$mx_ihd_sc  * output_burden_sc$Lx_sc
+    output_burden_sc$mx_num_diff_ihd <- output_burden_sc$mx_num_bl_ihd - output_burden_sc$mx_num_sc_ihd
+   
+    ###Ischemic stroke
+    output_burden_sc$inc_num_bl_istroke <- output_burden_sc$incidence_disease_istroke_bl *(1 - output_burden_sc$px_istroke_bl)  * output_burden_sc$Lx_bl
+    output_burden_sc$inc_num_sc_istroke <- output_burden_sc$incidence_disease_istroke_sc *(1 - output_burden_sc$px_istroke_sc)  * output_burden_sc$Lx_sc
+    output_burden_sc$inc_num_diff_istroke <- output_burden_sc$inc_num_bl_istroke - output_burden_sc$inc_num_sc_istroke
+
+    output_burden_sc$mx_num_bl_istroke <- output_burden_sc$mx_istroke_bl  * output_burden_sc$Lx_bl
+    output_burden_sc$mx_num_sc_istroke <- output_burden_sc$mx_istroke_sc  * output_burden_sc$Lx_sc
+    output_burden_sc$mx_num_diff_istroke <- output_burden_sc$mx_num_bl_istroke - output_burden_sc$mx_num_sc_istroke
+     
+     
+    ###Colon cancer
+    output_burden_sc$inc_num_bl_colon_cancer <- output_burden_sc$incidence_disease_colon_cancer_bl *(1 - output_burden_sc$px_colon_cancer_bl)  * output_burden_sc$Lx_bl
+    output_burden_sc$inc_num_sc_colon_cancer <- output_burden_sc$incidence_disease_colon_cancer_sc *(1 - output_burden_sc$px_colon_cancer_sc)  * output_burden_sc$Lx_sc
+    output_burden_sc$inc_num_diff_colon_cancer <- output_burden_sc$inc_num_bl_colon_cancer - output_burden_sc$inc_num_sc_colon_cancer
+
+    output_burden_sc$mx_num_bl_colon_cancer <- output_burden_sc$mx_colon_cancer_bl  * output_burden_sc$Lx_bl
+    output_burden_sc$mx_num_sc_colon_cancer <- output_burden_sc$mx_colon_cancer_sc  * output_burden_sc$Lx_sc
+    output_burden_sc$mx_num_diff_colon_cancer <- output_burden_sc$mx_num_bl_colon_cancer - output_burden_sc$mx_num_sc_colon_cancer
+
+    ###Diabetes
+    output_burden_sc$inc_num_bl_diabetes <- output_burden_sc$incidence_disease_diabetes_bl *(1 - output_burden_sc$px_diabetes_bl)  * output_burden_sc$Lx_bl
+    output_burden_sc$inc_num_sc_diabetes <- output_burden_sc$incidence_disease_diabetes_sc *(1 - output_burden_sc$px_diabetes_sc)  * output_burden_sc$Lx_sc
+    output_burden_sc$inc_num_diff_diabetes <- output_burden_sc$inc_num_bl_diabetes - output_burden_sc$inc_num_sc_diabetes
+
+    output_burden_sc$mx_num_bl_diabetes <- output_burden_sc$mx_diabetes_bl  * output_burden_sc$Lx_bl
+    output_burden_sc$mx_num_sc_diabetes <- output_burden_sc$mx_diabetes_sc  * output_burden_sc$Lx_sc
+    output_burden_sc$mx_num_diff_diabetes <- output_burden_sc$mx_num_bl_diabetes - output_burden_sc$mx_num_sc_diabetes
+
+    ###Breast cancer
+    if (output_burden_sc$sex == "males")  {
+      
+    }  cat("\n")
+  }else{
+    output_burden_sc$inc_num_bl_breast_cancer <- output_burden_sc$incidence_disease_breast_cancer_bl *(1 - output_burden_sc$px_breast_cancer_bl)  * output_burden_sc$Lx_bl
+    output_burden_sc$inc_num_sc_breast_cancer <- output_burden_sc$incidence_disease_breast_cancer_sc *(1 - output_burden_sc$px_breast_cancer_sc)  * output_burden_sc$Lx_sc
+    output_burden_sc$inc_num_diff_breast_cancer <- output_burden_sc$inc_num_bl_breast_cancer - output_burden_sc$inc_num_sc_breast_cancer
+
+    output_burden_sc$mx_num_bl_breast_cancer <- output_burden_sc$mx_breast_cancer_bl  * output_burden_sc$Lx_bl
+    output_burden_sc$mx_num_sc_breast_cancer <- output_burden_sc$mx_breast_cancer_sc  * output_burden_sc$Lx_sc
+    output_burden_sc$mx_num_diff_breast_cancer <- output_burden_sc$mx_num_bl_breast_cancer - output_burden_sc$mx_num_sc_breast_cancer
+
+  }
     output_burden[[l_index]] <- output_burden_sc
     l_index <- l_index + 1
   }
@@ -470,146 +555,11 @@ for (age in p_age_cohort){
 #Uncomment to check
 View(output_burden[[2]])
 
-######Calculate difference in incidence and death numbers
-####Loop to do it for each disease
-
-
-incidence_sc <- list()
-index <- 1
-
-for (age in p_age_cohort){
-  for (sex in p_sex){
-    for (disease in p_disease) {
-      
-      # Exclude breast_cancer for Males
-      if (sex == "males" && disease == "breast_cancer"){
-        cat("\n")
-      }
-      else {
-        
-        incidence_sc[[index]] <- disease_life_table_list_bl[[index]]$incidence_disease * (1-(pifs[[index]]$pif))
-        index <- index + 1
-        
-      }
-    }
-  }
-}
-
-index <- 1
-
-for (disease in p_disease) {
-  if (sex == "males" && disease == "breast_cancer"){
-    cat("\n")
-  }else{
-
-    ###Create variables to add to outputs list
-
-    inc_num_bl <- paste("inc_num_bl", disease, sep = "-")
-    inc_num_sc <- paste("inc_num_sc", disease, sep = "-")
-    mx_num_bl <- paste("inc_num_mx", disease, sep = "-")
-    mx_num_sc <- paste("inc_num_mx", disease, sep = "-")
-
-    ### Add generic variable names to the source data frame (output_burden)
-    output_burden[[index]]$inc_num_bl <- output_burden[[index]][[inc_num_bl]]
-    output_burden[[index]]$inc_num_sc <- output_burden[[index]][[inc_num_sc]]
-    output_burden[[index]]$mx_num_bl <- output_burden[[index]][[inc_num_bl]]
-    output_burden[[index]]$mx_num_sc <- output_burden[[index]][[inc_num_sc]]
-    
-
-    ### Give values
-    output_burden[[index]]$inc_num_bl <- 0
-    output_burden[[index]]$inc_num_sc <- 0
-    output_burden[[index]]$mx_num_bl <- 0
-    output_burden[[index]]$mx_num_sc <- 0
-
-    index <- index + 1
-
-
-  }
-}
-
-#Uncomment to check
-View(output_burden[[2]])
 
 
 
-# output_burden <- list()
-# index <- 1
-# 
-# for (age in p_age_cohort){
-#   for (sex in p_sex){
-#     for (disease in p_disease) {
-#       
-#       # Exclude breast_cancer for Males
-#       if (sex == "males" && disease == "breast_cancer"){
-#         cat("\n")
-#       }
-#       else {
-#         
-#         output_burden[[index]]$incidence_bl <- disease_life_table_list_bl[[index]]$incidence_disease
-#         output_burden[[index]]$incidence_sc <- disease_life_table_list_sc[[index]]$incidence_disease
-#         output_burden[[index]]$mx_bl <- disease_life_table_list_bl[[index]]$mx
-#         output_burden[[index]]$mx_sc <- disease_life_table_list_sc[[index]]$mx
-#         index <- index + 1
-#         
-#       }
-#     }
-#   }
-# }
 
-# incidence_sc <- list()
-# index <- 1
-# 
-# for (age in p_age_cohort){
-#   for (sex in p_sex){
-#     for (disease in p_disease) {
-#       
-#       # Exclude breast_cancer for Males
-#       if (sex == "males" && disease == "breast_cancer"){
-#         cat("\n")
-#       }
-#       else {
-#         
-#         incidence_sc[[index]] <- disease_life_table_list_bl[[index]]$incidence_disease * (1-(pifs[[index]]$pif))
-#         index <- index + 1
-#         
-#       }
-#     }
-#   }
-# }
-# 
-# # output_burden <- list()
-# # l_index <- 1
-# # index <- 1
-# # 
-# # for (age in p_age_cohort){
-# #   for (sex in p_sex){
-# #     output <- NULL
-# #     create_new <- T
-# #     
-# #     for (disease in p_disease) {
-# #       if (sex == "males" && disease == "breast_cancer"){
-# #         cat("\n")
-# #       }else{
-# #         
-# #         if (create_new){
-# #           output <- select(disease_life_table_list_sc[[index]], c('age', 'sex'))
-# #           output$Lx_bl <- 0
-# #           create_new <- F
-# #           pylds_sum$total <- pylds_sum$total + (disease_life_table_list_sc[[index]]$diff_pylds_disease)
-# #         }else{
-# #           pylds_sum$total <- pylds_sum$total + (disease_life_table_list_sc[[index]]$diff_pylds_disease)
-# #         }
-# #         
-# #         cat(age, " - ", sex," - ",  disease," - ",  index, " - ", l_index,  "\n")
-# #         index <- index + 1
-# #       }
-# #       
-# #     }
-# #     pylds_sc_total[[l_index]] <- pylds_sum
-# #     l_index <- l_index + 1
-# #   }
-# # }  
+
 # ###TO USE LATER TO GENERATE TOTALS 
 # # # Sum of columns
 # # 
