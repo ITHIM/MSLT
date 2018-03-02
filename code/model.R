@@ -378,6 +378,8 @@ View(general_life_table_list_bl[[32]])
 
 #####In the following list "output_life_table", 32 data frames are nested per age and sex cohort
 
+#####In the following list "output_life_table", 32 data frames are nested per age and sex cohort
+
 output_burden <- list()
 l_index <- 1
 index <- 1
@@ -388,8 +390,11 @@ for (age in p_age_cohort){
       if (sex == "males" && disease == "breast_cancer"){
         cat("\n")
       }else{
+        
+        # disease_life_table_list_sc and disease_life_table_list_bl (incidence_disease and mx)
+        
+        
         if (create_new){
-          
           output_burden_sc <- select(disease_life_table_list_sc[[index]], c('age', 'sex', 'incidence_disease', 'mx', 'px'))
           names(output_burden_sc)[names(output_burden_sc) == 'incidence_disease'] <- paste('incidence_disease', disease, "sc", sep = "_")
           names(output_burden_sc)[names(output_burden_sc) == 'mx'] <- paste('mx', disease, "sc", sep = "_")
@@ -400,26 +405,46 @@ for (age in p_age_cohort){
           names(output_burden_bl)[names(output_burden_bl) == 'mx'] <- paste('mx', disease, "bl", sep = "_")
           names(output_burden_bl)[names(output_burden_bl) == 'px'] <- paste('px', disease, "bl", sep = "_")
           
-          output_burden_sc <- cbind(output_burden_sc, output_burden_bl)
-          create_new <- F
+          ####New list to add calculations/not pasting the disease names propertly
+          
+          output_burden_change <- list(inc_num_bl, inc_num_sc, mx_num_bl, mx_num_sc)
+          
+          inc_num_bl <- paste("inc_num_bl", disease, sep = "-")
+          inc_num_sc <- paste("inc_num_sc", disease, sep = "-")
+          mx_num_bl <- paste("inc_num_mx", disease, sep = "-")
+          mx_num_sc <- paste("inc_num_mx", disease, sep = "-")
         
-          }else{
+          output_burden_sc <- cbind(output_burden_sc, output_burden_bl)
+          output_burden_sc <- cbind(output_burden_sc, output_burden_change)
+          
+          
+          create_new <- F
+          
+    
+          
+        }else{
           
           td3 <- select(disease_life_table_list_sc[[index]], c('incidence_disease', 'mx', 'px'))
           names(td3)[names(td3) == 'incidence_disease'] <- paste('incidence_disease', disease, "sc", sep = "_")
           names(td3)[names(td3) == 'mx'] <- paste('mx', disease, "sc", sep = "_")
           names(td3)[names(td3) == 'px'] <- paste('px', disease, "sc", sep = "_")
-
+          
           td4 <- select(disease_life_table_list_bl[[index]], c('incidence_disease', 'mx', 'px'))
           names(td4)[names(td4) == 'incidence_disease'] <- paste('incidence_disease', disease, "bl", sep = "_")
           names(td4)[names(td4) == 'mx'] <- paste('mx', disease, "bl", sep = "_")
           names(td4)[names(td4) == 'px'] <- paste('px', disease, "bl", sep = "_")
-        
+         
+          output_burden_change2 <- list(inc_num_bl, inc_num_sc, mx_num_bl, mx_num_sc)
+          
+          inc_num_bl <- paste("inc_num_bl", disease, sep = "-")
+          inc_num_sc <- paste("inc_num_sc", disease, sep = "-")
+          mx_num_bl <- paste("inc_num_mx", disease, sep = "-")
+          mx_num_sc <- paste("inc_num_mx", disease, sep = "-")
           
           output_burden_sc <- cbind(output_burden_sc, td3)
           output_burden_sc <- cbind(output_burden_sc, td4)
+          output_burden_sc <- cbind(output_burden_sc, output_burden_change2)
           
-
         }
         
         cat(age, " - ", sex," - ",  disease," - ",  index, " - ", l_index,  "\n")
@@ -438,11 +463,6 @@ for (age in p_age_cohort){
     output_burden_sc <- cbind(output_burden_sc, output_burden_lf_sc)
     output_burden_sc <- cbind(output_burden_sc, output_burden_lf_bl)
     output_burden[[l_index]] <- output_burden_sc
-
-    
- 
-    
-  
     l_index <- l_index + 1
   }
 }
@@ -450,45 +470,66 @@ for (age in p_age_cohort){
 #Uncomment to check
 View(output_burden[[2]])
 
+######Calculate difference in incidence and death numbers
+####Loop to do it for each disease
 
-# ######Calculate difference in incidence and death numbers
-# ####Loop to do it for each disease
-# 
-# index <- 1
-# 
-# for (disease in p_disease) {
-#   if (sex == "males" && disease == "breast_cancer"){
-#     cat("\n")
-#   }else{
-#     
-#     ###Create variables to add to outputs list
-#     
-#     inc_num_bl <- paste("inc_num_bl", disease, sep = "-")
-#     inc_num_sc <- paste("inc_num_sc", disease, sep = "-")
-#     mx_num_bl <- paste("inc_num_mx", disease, sep = "-")
-#     mx_num_sc <- paste("inc_num_mx", disease, sep = "-")
-#     
-#     ### Add generic variable names to the source data frame (output_burden)
-#     output_burden[[index]]$inc_num_bl <- output_burden[[inc_num_bl]]
-#     output_burden[[index]]$inc_num_sc <- output_burden[[inc_num_sc]]
-#     output_burden[[index]]$mx_num_bl <- output_burden[[inc_num_bl]]
-#     output_burden[[index]]$mx_num_sc <- output_burden[[inc_num_sc]]
-#     
-#     
-#     ### Give values
-#     output_burden[[index]]$inc_num_bl <- 
-#     output_burden[[index]]$inc_num_sc <- 0
-#     output_burden[[index]]$mx_num_bl <- 0
-#     output_burden[[index]]$mx_num_sc <- 0
-#     
-#     index <- index + 1
-#     
-#     
-#   }
-# }
-# 
-# #Uncomment to check
-# View(output_burden[[2]])
+
+incidence_sc <- list()
+index <- 1
+
+for (age in p_age_cohort){
+  for (sex in p_sex){
+    for (disease in p_disease) {
+      
+      # Exclude breast_cancer for Males
+      if (sex == "males" && disease == "breast_cancer"){
+        cat("\n")
+      }
+      else {
+        
+        incidence_sc[[index]] <- disease_life_table_list_bl[[index]]$incidence_disease * (1-(pifs[[index]]$pif))
+        index <- index + 1
+        
+      }
+    }
+  }
+}
+
+index <- 1
+
+for (disease in p_disease) {
+  if (sex == "males" && disease == "breast_cancer"){
+    cat("\n")
+  }else{
+
+    ###Create variables to add to outputs list
+
+    inc_num_bl <- paste("inc_num_bl", disease, sep = "-")
+    inc_num_sc <- paste("inc_num_sc", disease, sep = "-")
+    mx_num_bl <- paste("inc_num_mx", disease, sep = "-")
+    mx_num_sc <- paste("inc_num_mx", disease, sep = "-")
+
+    ### Add generic variable names to the source data frame (output_burden)
+    output_burden[[index]]$inc_num_bl <- output_burden[[index]][[inc_num_bl]]
+    output_burden[[index]]$inc_num_sc <- output_burden[[index]][[inc_num_sc]]
+    output_burden[[index]]$mx_num_bl <- output_burden[[index]][[inc_num_bl]]
+    output_burden[[index]]$mx_num_sc <- output_burden[[index]][[inc_num_sc]]
+    
+
+    ### Give values
+    output_burden[[index]]$inc_num_bl <- 0
+    output_burden[[index]]$inc_num_sc <- 0
+    output_burden[[index]]$mx_num_bl <- 0
+    output_burden[[index]]$mx_num_sc <- 0
+
+    index <- index + 1
+
+
+  }
+}
+
+#Uncomment to check
+View(output_burden[[2]])
 
 
 
