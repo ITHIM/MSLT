@@ -12,12 +12,18 @@ require(stats)
 
 run_life_table <- function(in_idata, in_sex, in_mid_age)
 {
+  
+  
   # Create a Life Table data frame
   
   # Filter in_idata by age and select columns for lifetable calculations
-  lf_df <- filter(in_idata, age >= in_mid_age & sex == in_sex) %>% select(sex, age, qx, pyld_rate, mx)
+  lf_df <- filter(in_idata, age >= in_mid_age & sex == in_sex) %>% select(sex, age, pyld_rate, mx)
   
   # Create list of required columns (variables)
+   #Calculate probability of dying
+  
+  lf_df$qx <-  ifelse(lf_df$age < 100, 1 - exp(-1 * lf_df$mx), 1)
+  
   # number of survivors
   lf_df$lx <- 0
   # Create it for males population
