@@ -378,22 +378,22 @@ View(general_life_table_list_bl[[32]])
 
 #####In the following list "output_life_table", 32 data frames are nested per age and sex cohort
 
-#####In the following list "output_life_table", 32 data frames are nested per age and sex cohort
 
 output_burden <- list()
 l_index <- 1
 index <- 1
 for (age in p_age_cohort){
   for (sex in p_sex){
+    
+#Males do not have breast cancer, that is why we need the if/else. 
+#We create a TRUE/FALSE variable for the loop to move into the next disease
+    
     create_new <- T
     for (disease in p_disease) {
       if (sex == "males" && disease == "breast_cancer"){
         cat("\n")
       }else{
-        
-        # disease_life_table_list_sc and disease_life_table_list_bl (incidence_disease and mx)
-        
-        
+      
         if (create_new){
           output_burden_sc <- select(disease_life_table_list_sc[[index]], c('age', 'sex', 'incidence_disease', 'mx', 'px'))
           names(output_burden_sc)[names(output_burden_sc) == 'incidence_disease'] <- paste('incidence_disease', disease, "sc", sep = "_")
@@ -405,35 +405,32 @@ for (age in p_age_cohort){
           names(output_burden_bl)[names(output_burden_bl) == 'mx'] <- paste('mx', disease, "bl", sep = "_")
           names(output_burden_bl)[names(output_burden_bl) == 'px'] <- paste('px', disease, "bl", sep = "_")
           
-          ####New list to add calculations/not pasting the disease names propertly
-          
-          output_burden_change <- list()
-          
-          output_burden_change$inc_num_bl <- 0
-          output_burden_change$inc_num_sc <- 0
-          output_burden_change$inc_num_diff <- 0
-          
-          output_burden_change$mx_num_bl <- 0
-          output_burden_change$mx_num_sc <- 0
-          output_burden_change$mx_num_diff <- 0
-          
-           names(output_burden_change)[names(output_burden_change) == 'inc_num_bl'] <- paste('inc_num_bl', disease, sep = "_")
-           names(output_burden_change)[names(output_burden_change) == 'inc_num_sc'] <- paste('inc_num_sc', disease, sep = "_")
-           names(output_burden_change)[names(output_burden_change) == 'inc_num_diff'] <- paste('inc_num_diff', disease, sep = "_")
-           names(output_burden_change)[names(output_burden_change) == 'mx_num_bl'] <- paste('mx_num_bl', disease, sep = "_")
-           names(output_burden_change)[names(output_burden_change) == 'mx_num_sc'] <- paste('mx_num_sc', disease, sep = "_")
-           names(output_burden_change)[names(output_burden_change) == 'mx_num_diff'] <- paste('mx_num_diff', disease, sep = "_")
+           ####New list to add calculations
            
-
+           output_burden_change <- list()
+           
+           output_burden_change$inc_num_bl <- disease_life_table_list_bl[[index]]$incidence_disease * (1 - disease_life_table_list_bl[[index]]$px) * general_life_table_list_bl[[l_index]]$Lx
+           output_burden_change$inc_num_sc <- disease_life_table_list_sc[[index]]$incidence_disease * (1 - disease_life_table_list_sc[[index]]$px) * general_life_table_list_sc[[l_index]]$Lx
+           output_burden_change$inc_num_diff <- (disease_life_table_list_bl[[index]]$incidence_disease * (1 - disease_life_table_list_bl[[index]]$px) * general_life_table_list_bl[[l_index]]$Lx) - (disease_life_table_list_sc[[index]]$incidence_disease * (1 - disease_life_table_list_sc[[index]]$px) * general_life_table_list_sc[[l_index]]$Lx)
+             
+           output_burden_change$mx_num_bl <- disease_life_table_list_bl[[index]]$mx * general_life_table_list_bl[[l_index]]$Lx
+           output_burden_change$mx_num_sc <- disease_life_table_list_sc[[index]]$mx * general_life_table_list_sc[[l_index]]$Lx
+           output_burden_change$mx_num_diff <- (disease_life_table_list_bl[[index]]$mx * general_life_table_list_bl[[l_index]]$Lx) - (disease_life_table_list_sc[[index]]$mx * general_life_table_list_sc[[l_index]]$Lx) 
+           
+            names(output_burden_change)[names(output_burden_change) == 'inc_num_bl'] <- paste('inc_num_bl', disease, sep = "_")
+            names(output_burden_change)[names(output_burden_change) == 'inc_num_sc'] <- paste('inc_num_sc', disease, sep = "_")
+            names(output_burden_change)[names(output_burden_change) == 'inc_num_diff'] <- paste('inc_num_diff', disease, sep = "_")
+            names(output_burden_change)[names(output_burden_change) == 'mx_num_bl'] <- paste('mx_num_bl', disease, sep = "_")
+            names(output_burden_change)[names(output_burden_change) == 'mx_num_sc'] <- paste('mx_num_sc', disease, sep = "_")
+            names(output_burden_change)[names(output_burden_change) == 'mx_num_diff'] <- paste('mx_num_diff', disease, sep = "_")
+            
+           
           ###Bind all lists
         
           output_burden_sc <- cbind(output_burden_sc, output_burden_bl)
           output_burden_sc <- cbind(output_burden_sc, output_burden_change)
           
-          
           create_new <- F
-          
-    
           
         }else{
           
@@ -446,18 +443,18 @@ for (age in p_age_cohort){
           names(td4)[names(td4) == 'incidence_disease'] <- paste('incidence_disease', disease, "bl", sep = "_")
           names(td4)[names(td4) == 'mx'] <- paste('mx', disease, "bl", sep = "_")
           names(td4)[names(td4) == 'px'] <- paste('px', disease, "bl", sep = "_")
-         
-          ####New list to add calculations/not pasting the disease names propertly
-          
+
+         ####New list to add calculations/not pasting the disease names propertly
+
           output_burden_change2 <- list()
           
-          output_burden_change2$inc_num_bl <- 0
-          output_burden_change2$inc_num_sc <- 0
-          output_burden_change2$inc_num_diff <- 0
+          output_burden_change2$inc_num_bl <- disease_life_table_list_bl[[index]]$incidence_disease * (1 - disease_life_table_list_bl[[index]]$px) * general_life_table_list_bl[[l_index]]$Lx
+          output_burden_change2$inc_num_sc <- disease_life_table_list_sc[[index]]$incidence_disease * (1 - disease_life_table_list_sc[[index]]$px) * general_life_table_list_sc[[l_index]]$Lx
+          output_burden_change2$inc_num_diff <- (disease_life_table_list_bl[[index]]$incidence_disease * (1 - disease_life_table_list_bl[[index]]$px) * general_life_table_list_bl[[l_index]]$Lx) - (disease_life_table_list_sc[[index]]$incidence_disease * (1 - disease_life_table_list_sc[[index]]$px) * general_life_table_list_sc[[l_index]]$Lx)
           
-          output_burden_change2$mx_num_bl <- 0
-          output_burden_change2$mx_num_sc <- 0
-          output_burden_change2$mx_num_diff <- 0
+          output_burden_change2$mx_num_bl <- disease_life_table_list_bl[[index]]$mx * general_life_table_list_bl[[l_index]]$Lx
+          output_burden_change2$mx_num_sc <- disease_life_table_list_sc[[index]]$mx * general_life_table_list_sc[[l_index]]$Lx
+          output_burden_change2$mx_num_diff <- (disease_life_table_list_bl[[index]]$mx * general_life_table_list_bl[[l_index]]$Lx) - (disease_life_table_list_sc[[index]]$mx * general_life_table_list_sc[[l_index]]$Lx) 
           
           names(output_burden_change2)[names(output_burden_change2) == 'inc_num_bl'] <- paste('inc_num_bl', disease, sep = "_")
           names(output_burden_change2)[names(output_burden_change2) == 'inc_num_sc'] <- paste('inc_num_sc', disease, sep = "_")
@@ -467,7 +464,7 @@ for (age in p_age_cohort){
           names(output_burden_change2)[names(output_burden_change2) == 'mx_num_diff'] <- paste('mx_num_diff', disease, sep = "_")
           
           
-          ###Bind all lists
+           ###Bind all lists
           
           output_burden_sc <- cbind(output_burden_sc, td3)
           output_burden_sc <- cbind(output_burden_sc, td4)
@@ -492,65 +489,13 @@ for (age in p_age_cohort){
     output_burden_sc <- cbind(output_burden_sc, output_burden_lf_bl)
     
 
-
-  ###Complete empty variables with values (IS THERE A BETTER WAY OF DOING THIS??, LOOP, need to work out changes in disease name and paste in name)
-  
-
-    ###IHD
-    output_burden_sc$inc_num_bl_ihd <- output_burden_sc$incidence_disease_ihd_bl *(1 - output_burden_sc$px_ihd_bl)  * output_burden_sc$Lx_bl
-    output_burden_sc$inc_num_sc_ihd <- output_burden_sc$incidence_disease_ihd_sc *(1 - output_burden_sc$px_ihd_sc)  * output_burden_sc$Lx_sc
-    output_burden_sc$inc_num_diff_ihd <- output_burden_sc$inc_num_bl_ihd - output_burden_sc$inc_num_sc_ihd
-
-    output_burden_sc$mx_num_bl_ihd <- output_burden_sc$mx_ihd_bl  * output_burden_sc$Lx_bl
-    output_burden_sc$mx_num_sc_ihd <- output_burden_sc$mx_ihd_sc  * output_burden_sc$Lx_sc
-    output_burden_sc$mx_num_diff_ihd <- output_burden_sc$mx_num_bl_ihd - output_burden_sc$mx_num_sc_ihd
-   
-    ###Ischemic stroke
-    output_burden_sc$inc_num_bl_istroke <- output_burden_sc$incidence_disease_istroke_bl *(1 - output_burden_sc$px_istroke_bl)  * output_burden_sc$Lx_bl
-    output_burden_sc$inc_num_sc_istroke <- output_burden_sc$incidence_disease_istroke_sc *(1 - output_burden_sc$px_istroke_sc)  * output_burden_sc$Lx_sc
-    output_burden_sc$inc_num_diff_istroke <- output_burden_sc$inc_num_bl_istroke - output_burden_sc$inc_num_sc_istroke
-
-    output_burden_sc$mx_num_bl_istroke <- output_burden_sc$mx_istroke_bl  * output_burden_sc$Lx_bl
-    output_burden_sc$mx_num_sc_istroke <- output_burden_sc$mx_istroke_sc  * output_burden_sc$Lx_sc
-    output_burden_sc$mx_num_diff_istroke <- output_burden_sc$mx_num_bl_istroke - output_burden_sc$mx_num_sc_istroke
-     
-     
-    ###Colon cancer
-    output_burden_sc$inc_num_bl_colon_cancer <- output_burden_sc$incidence_disease_colon_cancer_bl *(1 - output_burden_sc$px_colon_cancer_bl)  * output_burden_sc$Lx_bl
-    output_burden_sc$inc_num_sc_colon_cancer <- output_burden_sc$incidence_disease_colon_cancer_sc *(1 - output_burden_sc$px_colon_cancer_sc)  * output_burden_sc$Lx_sc
-    output_burden_sc$inc_num_diff_colon_cancer <- output_burden_sc$inc_num_bl_colon_cancer - output_burden_sc$inc_num_sc_colon_cancer
-
-    output_burden_sc$mx_num_bl_colon_cancer <- output_burden_sc$mx_colon_cancer_bl  * output_burden_sc$Lx_bl
-    output_burden_sc$mx_num_sc_colon_cancer <- output_burden_sc$mx_colon_cancer_sc  * output_burden_sc$Lx_sc
-    output_burden_sc$mx_num_diff_colon_cancer <- output_burden_sc$mx_num_bl_colon_cancer - output_burden_sc$mx_num_sc_colon_cancer
-
-    ###Diabetes
-    output_burden_sc$inc_num_bl_diabetes <- output_burden_sc$incidence_disease_diabetes_bl *(1 - output_burden_sc$px_diabetes_bl)  * output_burden_sc$Lx_bl
-    output_burden_sc$inc_num_sc_diabetes <- output_burden_sc$incidence_disease_diabetes_sc *(1 - output_burden_sc$px_diabetes_sc)  * output_burden_sc$Lx_sc
-    output_burden_sc$inc_num_diff_diabetes <- output_burden_sc$inc_num_bl_diabetes - output_burden_sc$inc_num_sc_diabetes
-
-    output_burden_sc$mx_num_bl_diabetes <- output_burden_sc$mx_diabetes_bl  * output_burden_sc$Lx_bl
-    output_burden_sc$mx_num_sc_diabetes <- output_burden_sc$mx_diabetes_sc  * output_burden_sc$Lx_sc
-    output_burden_sc$mx_num_diff_diabetes <- output_burden_sc$mx_num_bl_diabetes - output_burden_sc$mx_num_sc_diabetes
-
-    ###Breast cancer
-    if (output_burden_sc$sex == "males")  {
-      
-    }  cat("\n")
-  }else{
-    output_burden_sc$inc_num_bl_breast_cancer <- output_burden_sc$incidence_disease_breast_cancer_bl *(1 - output_burden_sc$px_breast_cancer_bl)  * output_burden_sc$Lx_bl
-    output_burden_sc$inc_num_sc_breast_cancer <- output_burden_sc$incidence_disease_breast_cancer_sc *(1 - output_burden_sc$px_breast_cancer_sc)  * output_burden_sc$Lx_sc
-    output_burden_sc$inc_num_diff_breast_cancer <- output_burden_sc$inc_num_bl_breast_cancer - output_burden_sc$inc_num_sc_breast_cancer
-
-    output_burden_sc$mx_num_bl_breast_cancer <- output_burden_sc$mx_breast_cancer_bl  * output_burden_sc$Lx_bl
-    output_burden_sc$mx_num_sc_breast_cancer <- output_burden_sc$mx_breast_cancer_sc  * output_burden_sc$Lx_sc
-    output_burden_sc$mx_num_diff_breast_cancer <- output_burden_sc$mx_num_bl_breast_cancer - output_burden_sc$mx_num_sc_breast_cancer
-
-  }
     output_burden[[l_index]] <- output_burden_sc
     l_index <- l_index + 1
-  }
+  
+ }
 }
+
+
 
 #Uncomment to check
 View(output_burden[[2]])
