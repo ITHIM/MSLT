@@ -507,8 +507,6 @@ for (age in p_age_cohort){
  }
 }
 
-
-
 #Uncomment to check
 View(output_burden[[1]])
 

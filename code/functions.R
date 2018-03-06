@@ -179,7 +179,7 @@ run_disease <- function(in_idata, in_mid_age, in_sex, in_disease)
                                                         - dlt_df$qx[i-1] * (dlt_df$Sx[i-1] + dlt_df$Cx[i-1])
                                                         *(dlt_df$vx[i-1]+dlt_df$wx[i-1]) + 2 * dlt_df$qx[i-1] * 
                                                           (dlt_df$Sx[i-1]+dlt_df$Cx[i-1]+dlt_df$Dx[i-1])) 
-                                   / (2 * (dlt_df$qx[i-1])), dlt_df$Cx[i - 1])
+                                   / (2 * (dlt_df$qx[i-1])), dlt_df$Dx[i - 1])
             
             
           }}}}}
