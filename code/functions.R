@@ -1,27 +1,46 @@
-## Function to run age and sex cohorts
-
-
-
-#Required packages
+#####Packages
 
 require(dplyr)
 require(tidyverse)
 require(stats)
 
+#############################Explanation method###################################
+
+#####Briefly, the proportional multi-state multi cohort life table consists of a 
+#####general life table and a life table for each of the modelled diseases.
+#####The diseases are those associated to the studied risk factor/s. 
+#####The link between the general life table and disease life tables is via the 
+#####potential impact fraction (pif), also called paf (population attributable fraction)
+#####The pif combines exposure to the risk factor and relative risks. The pif is 
+#####appleid to modify incidence in the individual disease life tables, which in turn
+#####modify prevalence and mortality. Changes in mortality and prevalence rates
+#####feed bacak into the general life table to modify total mortality and disability. 
+####Changes in total mortality impact on life years and changes in disability impact 
+####the disability adjusment of life years. 
+
+#### Method reference: 1.	Barendregt JJ, Oortmarssen vGJ, Murray CJ, Vos T. A generic model for the assessment of disease epidemiology: the computational basis of DisMod II. Popul Health Metr. 2003;1(1):4-.
+
+
+####The functions: run_life_table, run_disease, and run_pif serve to generate outputs
+####per age and sex (see model.R). The function run_output to facilitate the generation
+####of results. 
+
+
 #############################Function for general life table###################################
+#####Function to generate age and sex life tables. The function is then use in the model.R script
+#####to calculate variables for the baseline and scenario life tables. 
 
 run_life_table <- function(in_idata, in_sex, in_mid_age)
 {
   
-  
-  # Create a Life Table data frame
+  # Create a life table data frame
   
   # Filter in_idata by age and select columns for lifetable calculations
   lf_df <- filter(in_idata, age >= in_mid_age & sex == in_sex) %>% select(sex, age, pyld_rate, mx)
   
   # Create list of required columns (variables)
-   #Calculate probability of dying
   
+  # probability of dying
   lf_df$qx <-  ifelse(lf_df$age < 100, 1 - exp(-1 * lf_df$mx), 1)
   
   # number of survivors
@@ -32,6 +51,7 @@ run_life_table <- function(in_idata, in_sex, in_mid_age)
   
   # number died
   lf_df$dx <- 0
+  
   # Create it for males population
   lf_df$dx[1] <- lf_df$lx[1] * lf_df$qx[1]
   
@@ -51,15 +71,15 @@ run_life_table <- function(in_idata, in_sex, in_mid_age)
     
   }
   
-  # Create life expectancy variable
+  # create life expectancy variable
   for (i in 1:nrow(lf_df)){
     lf_df$ex[i] <- sum(lf_df$Lx[i:nrow(lf_df)]) / lf_df$lx[i]
   }
   
-  # Create health adjusted life years variable
+  # create health adjusted life years variable
   lf_df$Lwx <- lf_df$Lx * (1 - lf_df$pyld_rate)
   
-  # Create health adjusted life expectancy variable
+  # create health adjusted life expectancy variable
   for (i in 1:nrow(lf_df)){
     lf_df$ewx[i] <- sum(lf_df$Lwx[i:nrow(lf_df)]) / lf_df$lx[i]
   }
@@ -81,24 +101,24 @@ run_disease <- function(in_idata, in_mid_age, in_sex, in_disease)
   # in_mid_age = 22
   # in_disease = "ihd"
   
-  # Create disease variable for the disease life table function 
+  # create disease variable for the disease life table function 
   dw_disease <- paste("dw", in_disease, sep = "_")
   incidence_disease <- paste("incidence", in_disease, sep = "_")
   case_fatality_disease <- paste("case_fatality", in_disease, sep = "_")
   
-  ## Add generic variable names to the source data frame (in_idata)
+  ## add generic variable names to the source data frame (in_idata)
   in_idata$dw_disease <- in_idata[[dw_disease]]
   in_idata$incidence_disease <- in_idata[[incidence_disease]]
   in_idata$case_fatality_disease <- in_idata[[case_fatality_disease]]
   
-  # Filter in_idata by age and select columns for lifetable calculations
+  # filter in_idata by age and select columns for lifetable calculations
   dlt_df <- filter(in_idata, age >= in_mid_age & sex == in_sex) %>% 
-    select(sex, age, dw_disease, incidence_disease, case_fatality_disease)
+  select(sex, age, dw_disease, incidence_disease, case_fatality_disease)
   
   dlt_df$disease <- in_disease
   
-  #Create list of required columns
-  ##Intermediate variables lx, qx, wx and vx
+  # create list of required columns
+  ## intermediate variables lx, qx, wx and vx
   ###lx
   dlt_df$lx <- dlt_df$incidence_disease + dlt_df$case_fatality_disease
   ###qx
@@ -109,10 +129,10 @@ run_disease <- function(in_idata, in_mid_age, in_sex, in_disease)
   dlt_df$vx <- exp(-1*(dlt_df$lx-dlt_df$qx)/2)
   
   ## Healthy (Sx), Disease (Cx) and Death (Dx), total (Tx) (control check, has to be 1000), total alive (Ax)
-  ##persons years live at risk (PYx), prevalence rate (px), mortality rate (mx)
-  ###Remission and mortality from other causes were replaced by zero in the formulas (as we assume no remission and independence of disease mortality with total mortlaity). 
+  ## persons years live at risk (PYx), prevalence rate (px), mortality rate (mx)
+  ### Remission and mortality from other causes were replaced by zero in the formulas (as we assume no remission and independence of disease mortality with total mortlaity). 
   
-  ####First create empty variables
+  #### first create empty variables
   
   dlt_df$Sx <- 0
   dlt_df$Cx <- 0
@@ -123,14 +143,13 @@ run_disease <- function(in_idata, in_mid_age, in_sex, in_disease)
   dlt_df$px <- 0
   dlt_df$mx <- 0
   
-  #####Start with variables without calculation exceptions
+  ##### start with variables without calculation exceptions
   
   for (i in 1:nrow(dlt_df)){
     dlt_df$Tx   <- dlt_df$Sx + dlt_df$Cx + dlt_df$Dx 
     dlt_df$Ax <- dlt_df$Sx + dlt_df$Cx
     
-    
-    #####Variables with exceptions  
+    ##### variables with exceptions  
     
     for (i in 1:nrow(dlt_df)){
       if (i < nrow(dlt_df))
@@ -144,7 +163,6 @@ run_disease <- function(in_idata, in_mid_age, in_sex, in_disease)
       }
       else{
         dlt_df$px[i] <- (sum(dlt_df$Cx[i] + dlt_df$Cx[i + 1])/2) / dlt_df$PYx[i]    
-        
         
         
         if ((dlt_df$Dx[i+1] - dlt_df$Dx[i]) < 0){
@@ -189,14 +207,14 @@ run_disease <- function(in_idata, in_mid_age, in_sex, in_disease)
 
 #######################################Function for PIFs########################################
 
-##The code for PIFs will depend on the data sources. 
+##### the code for PIFs will depend on the data sources. 
 
 
 run_pif <- function(in_idata, i_irr, i_exposure, in_mid_age, in_sex, in_disease, in_met_sc) 
   # 
 {
   
-  ##Uncomment to debug function
+  ## uncomment to debug function
   
   # in_idata = idata
   # i_irr = irr
@@ -206,12 +224,12 @@ run_pif <- function(in_idata, i_irr, i_exposure, in_mid_age, in_sex, in_disease,
   # in_disease = "breast_cancer"
   # in_met_sc <- effect
   
-  ###Filter data to use in pif calculations (age and sex). Add rrs, ee and calculations
+  ### filter data to use in pif calculations (age and sex). Add rrs, ee and calculations
   
   pif_df <- filter(in_idata, age >= in_mid_age & sex == in_sex) %>%
     select(sex, age)
   
-  ###Add varaibles to data.frame (different age category for breast cancer)
+  ### add varaibles to data.frame (different age category for breast cancer)
   
   pif_df$disease <- in_disease
   
@@ -229,17 +247,17 @@ run_pif <- function(in_idata, i_irr, i_exposure, in_mid_age, in_sex, in_disease,
   
   pif_df$sex_cat <- ifelse(in_disease == "breast_cancer", "female", "female_male")
   
-  ##Create concatenated variables to match pif_df with i_irr
+  # create concatenated variables to match pif_df with i_irr
   pif_df$sex_age_dis_cat <- paste(pif_df$disease,pif_df$age_cat, pif_df$sex_cat, sep = "_"  )
   i_irr$sex_age_dis_cat <- paste(i_irr$disease,i_irr$age, i_irr$sex, sep = "_"  )
   
-  # Remove sex, age and disease variables from i_irr df, as they are not needed
+  # remove sex, age and disease variables from i_irr df, as they are not needed
   i_irr <- select(i_irr, -one_of('sex','age', 'disease'))
   
-  ## The code below is working but copies age, sex and disease for x and y, how can this be avoided?
+  # the code below is working but copies age, sex and disease for x and y, how can this be avoided?
   pif_df <-  inner_join(pif_df, i_irr, by = c("sex_age_dis_cat" = "sex_age_dis_cat") , copy = FALSE)
   
-  ## Creation of splineFun which uses baseline's RR and EE to use to estimate intervention RRs
+  # creation of splineFun which uses baseline's RR and EE to use to estimate intervention RRs
   for (i in 1:nrow(pif_df)){
     sp_obj <-  splinefun(y = c(pif_df$rr_inactive[i], 
                                pif_df$rr_insufficiently_active[i], 
@@ -251,7 +269,7 @@ run_pif <- function(in_idata, i_irr, i_exposure, in_mid_age, in_sex, in_disease,
                                pif_df$ee_highly_active[i]), 
                          method = "hyman")
     
-    ## Use created spline function above to estimate intervention RRs
+    # use created spline function above to estimate intervention RRs
     
     pif_df$sc_rr_inactive[i] <- sp_obj(x = pif_df$ee_inactive[i] + in_met_sc)
     pif_df$sc_rr_insufficiently_active[i] <-  sp_obj(x = pif_df$ee_insufficiently_active[i] + in_met_sc)
@@ -271,15 +289,15 @@ run_pif <- function(in_idata, i_irr, i_exposure, in_mid_age, in_sex, in_disease,
   pif_df$sex_age_cat <- paste(pif_df$sex, pif_df$age, sep = "_"  )
   i_exposure$sex_age_cat <- paste(i_exposure$sex, i_exposure$age, sep = "_"  )
   
-  # Remove sex, age and disease variables from i_irr df, as they are not needed
+  # remove sex, age and disease variables from i_irr df, as they are not needed
   i_exposure <- select(i_exposure, -one_of('sex','age'))
   
-  #Join edata (PA prevalence to pif_df)
+  # join edata (PA prevalence to pif_df)
   
   pif_df <-  inner_join(pif_df, i_exposure, by = c("sex_age_cat" = "sex_age_cat") , copy = FALSE)
   
-  
-  ##We need to adapt to ITHIMR developments. REPLACE DATA FRAME FROM WHICH PREVALENCE OF PA IS TAKEN
+ 
+  # we need to adapt to ITHIMR developments. REPLACE DATA FRAME FROM WHICH PREVALENCE OF PA IS TAKEN
   
   pif_df$pif <- 1-(pif_df$sc_rr_inactive *pif_df$inactive +
                      pif_df$sc_rr_insufficiently_active*pif_df$insufficiently_active +

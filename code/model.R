@@ -385,15 +385,15 @@ index <- 1
 for (age in p_age_cohort){
   for (sex in p_sex){
     
-#Males do not have breast cancer, that is why we need the if/else. 
-#We create a TRUE/FALSE variable for the loop to move into the next disease
+    #Males do not have breast cancer, that is why we need the if/else. 
+    #We create a TRUE/FALSE variable for the loop to move into the next disease
     
     create_new <- T
     for (disease in p_disease) {
       if (sex == "males" && disease == "breast_cancer"){
         cat("\n")
       }else{
-      
+        
         if (create_new){
           output_burden_sc <- select(disease_life_table_list_sc[[index]], c('age', 'sex', 'incidence_disease', 'mx', 'px'))
           names(output_burden_sc)[names(output_burden_sc) == 'incidence_disease'] <- paste('incidence_disease', disease, "sc", sep = "_")
@@ -405,28 +405,28 @@ for (age in p_age_cohort){
           names(output_burden_bl)[names(output_burden_bl) == 'mx'] <- paste('mx', disease, "bl", sep = "_")
           names(output_burden_bl)[names(output_burden_bl) == 'px'] <- paste('px', disease, "bl", sep = "_")
           
-           ####New list to add calculations for changes in burden of disease (incidence and mortality numbers)
-           
-           output_burden_change <- list()
-           
-           output_burden_change$inc_num_bl <- disease_life_table_list_bl[[index]]$incidence_disease * (1 - disease_life_table_list_bl[[index]]$px) * general_life_table_list_bl[[l_index]]$Lx
-           output_burden_change$inc_num_sc <- disease_life_table_list_sc[[index]]$incidence_disease * (1 - disease_life_table_list_sc[[index]]$px) * general_life_table_list_sc[[l_index]]$Lx
-           output_burden_change$inc_num_diff <- (disease_life_table_list_sc[[index]]$incidence_disease * (1 - disease_life_table_list_sc[[index]]$px) * general_life_table_list_sc[[l_index]]$Lx) - (disease_life_table_list_bl[[index]]$incidence_disease * (1 - disease_life_table_list_bl[[index]]$px) * general_life_table_list_bl[[l_index]]$Lx)
-             
-           output_burden_change$mx_num_bl <- disease_life_table_list_bl[[index]]$mx * general_life_table_list_bl[[l_index]]$Lx
-           output_burden_change$mx_num_sc <- disease_life_table_list_sc[[index]]$mx * general_life_table_list_sc[[l_index]]$Lx
-           output_burden_change$mx_num_diff <- (disease_life_table_list_sc[[index]]$mx * general_life_table_list_sc[[l_index]]$Lx) - (disease_life_table_list_bl[[index]]$mx * general_life_table_list_bl[[l_index]]$Lx) 
-           
-            names(output_burden_change)[names(output_burden_change) == 'inc_num_bl'] <- paste('inc_num_bl', disease, sep = "_")
-            names(output_burden_change)[names(output_burden_change) == 'inc_num_sc'] <- paste('inc_num_sc', disease, sep = "_")
-            names(output_burden_change)[names(output_burden_change) == 'inc_num_diff'] <- paste('inc_num_diff', disease, sep = "_")
-            names(output_burden_change)[names(output_burden_change) == 'mx_num_bl'] <- paste('mx_num_bl', disease, sep = "_")
-            names(output_burden_change)[names(output_burden_change) == 'mx_num_sc'] <- paste('mx_num_sc', disease, sep = "_")
-            names(output_burden_change)[names(output_burden_change) == 'mx_num_diff'] <- paste('mx_num_diff', disease, sep = "_")
-            
-           
+          ####New list to add calculations for changes in burden of disease (incidence and mortality numbers)
+          
+          output_burden_change <- list()
+          
+          output_burden_change$inc_num_bl <- disease_life_table_list_bl[[index]]$incidence_disease * (1 - disease_life_table_list_bl[[index]]$px) * general_life_table_list_bl[[l_index]]$Lx
+          output_burden_change$inc_num_sc <- disease_life_table_list_sc[[index]]$incidence_disease * (1 - disease_life_table_list_sc[[index]]$px) * general_life_table_list_sc[[l_index]]$Lx
+          output_burden_change$inc_num_diff <- (disease_life_table_list_sc[[index]]$incidence_disease * (1 - disease_life_table_list_sc[[index]]$px) * general_life_table_list_sc[[l_index]]$Lx) - (disease_life_table_list_bl[[index]]$incidence_disease * (1 - disease_life_table_list_bl[[index]]$px) * general_life_table_list_bl[[l_index]]$Lx)
+          
+          output_burden_change$mx_num_bl <- disease_life_table_list_bl[[index]]$mx * general_life_table_list_bl[[l_index]]$Lx
+          output_burden_change$mx_num_sc <- disease_life_table_list_sc[[index]]$mx * general_life_table_list_sc[[l_index]]$Lx
+          output_burden_change$mx_num_diff <- (disease_life_table_list_sc[[index]]$mx * general_life_table_list_sc[[l_index]]$Lx) - (disease_life_table_list_bl[[index]]$mx * general_life_table_list_bl[[l_index]]$Lx) 
+          
+          names(output_burden_change)[names(output_burden_change) == 'inc_num_bl'] <- paste('inc_num_bl', disease, sep = "_")
+          names(output_burden_change)[names(output_burden_change) == 'inc_num_sc'] <- paste('inc_num_sc', disease, sep = "_")
+          names(output_burden_change)[names(output_burden_change) == 'inc_num_diff'] <- paste('inc_num_diff', disease, sep = "_")
+          names(output_burden_change)[names(output_burden_change) == 'mx_num_bl'] <- paste('mx_num_bl', disease, sep = "_")
+          names(output_burden_change)[names(output_burden_change) == 'mx_num_sc'] <- paste('mx_num_sc', disease, sep = "_")
+          names(output_burden_change)[names(output_burden_change) == 'mx_num_diff'] <- paste('mx_num_diff', disease, sep = "_")
+          
+          
           ###Bind all lists
-        
+          
           output_burden_sc <- cbind(output_burden_sc, output_burden_bl)
           output_burden_sc <- cbind(output_burden_sc, output_burden_change)
           
@@ -445,9 +445,9 @@ for (age in p_age_cohort){
           names(td4)[names(td4) == 'incidence_disease'] <- paste('incidence_disease', disease, "bl", sep = "_")
           names(td4)[names(td4) == 'mx'] <- paste('mx', disease, "bl", sep = "_")
           names(td4)[names(td4) == 'px'] <- paste('px', disease, "bl", sep = "_")
-
-        
-
+          
+          
+          
           output_burden_change2 <- list()
           
           output_burden_change2$inc_num_bl <- disease_life_table_list_bl[[index]]$incidence_disease * (1 - disease_life_table_list_bl[[index]]$px) * general_life_table_list_bl[[l_index]]$Lx
@@ -466,7 +466,7 @@ for (age in p_age_cohort){
           names(output_burden_change2)[names(output_burden_change2) == 'mx_num_diff'] <- paste('mx_num_diff', disease, sep = "_")
           
           
-           ###Bind all lists
+          ###Bind all lists
           
           output_burden_sc <- cbind(output_burden_sc, td3)
           output_burden_sc <- cbind(output_burden_sc, td4)
@@ -500,11 +500,11 @@ for (age in p_age_cohort){
     output_burden_sc <- cbind(output_burden_sc, output_burden_lf_sc)
     output_burden_sc <- cbind(output_burden_sc, output_burden_lf_bl)
     
-
+    
     output_burden[[l_index]] <- output_burden_sc
     l_index <- l_index + 1
-  
- }
+    
+  }
 }
 
 #Uncomment to check
@@ -517,13 +517,18 @@ View(general_life_table_list_bl[[1]])
 View(general_life_table_list_sc[[1]])
 
 
+############################################################Outputs########################################################################################
+
+                                         
+#Check what happended with females over 97, these are not in th eoutput burden list
+
 
 # ###TO USE LATER TO GENERATE TOTALS 
 # # # Sum of columns
 # # 
 # # 
 # # for (age in p_age_cohort){
-# #   for (sex in p_sex){
+# #   for (sex in p_sex){                                                       
 # #     
 # #     mortality_sum <- 0
 # #     
