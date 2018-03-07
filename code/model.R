@@ -506,38 +506,70 @@ for (age in p_age_cohort){
 #Uncomment to check
 View(output_burden[[32]])
 
-
-
-
 ############################################################Outputs########################################################################################
 
-                                         
-#Check what happended with females over 97, these are not in th eoutput burden list
+#####Generate a data frame for all results and create function to get outcomes. 
 
 
-# ###TO USE LATER TO GENERATE TOTALS 
-# # # Sum of columns
-# # 
-# # 
-# # for (age in p_age_cohort){
-# #   for (sex in p_sex){                                                       
-# #     
-# #     mortality_sum <- 0
-# #     
-# #     for (disease in p_disease) {
-# #       
-# #       
-# #       if (sex == "males" && disease == "breast_cancer")
-# #         cat("\n")
-# #       else{
-# #         mortality_sum <- mortality_sum + sum(disease_life_table_list_sc[[index]]$diff_mort_disease)
-# #         # mx_sc_total[[index]] <- reduce(disease_life_table_list_sc[[index]]$diff_mort_disease, sum)
-# #         index <- index + 1
-# #       }
-# #       
-# #       cat(age, " - ", sex," - ",  disease," - ",  index, "\n")
-# #     }
-# #     mx_sc_total[[l_index]] <- mortality_sum
-# #     l_index <- l_index + 1
-# #   }
-# # }    
+output_df <- plyr::ldply(output_burden, rbind)
+
+###some calculations
+
+##Sum over all age sex cohorts total (all years)
+
+#Life years
+Lx_sum <- sum(output_df$Lx_diff)
+
+#Health-adjusted life years
+Lwx_sum <- sum(output_df$Lwx_diff)
+
+
+#Could to a loop
+#Incident cases
+Incident_ihd_total <- sum(output_df$inc_num_diff_ihd)
+Incident_istroke_total <- sum(output_df$inc_num_diff_istroke)
+Incident_diabetes_total <- sum(output_df$inc_num_diff_diabetes)
+Incident_breast_cancer_total <- sum(output_df$inc_num_diff_breast_cancer, na.rm=TRUE)
+Incident_colon_cancer_total <- sum(output_df$inc_num_diff_colon_cancer)
+
+#Death
+mx_ihd_total <- sum(output_df$mx_num_diff_ihd)
+mx_istroke_total <- sum(output_df$mx_num_diff_istroke)
+mx_diabetes_total <- sum(output_df$mx_num_diff_diabetes)
+mx_breast_cancer_total <- sum(output_df$mx_num_diff_breast_cancer, na.rm=TRUE)
+mx_colon_cancer_total <- sum(output_df$mx_num_diff_colon_cancer)
+
+#Outputs over 20 years (example) for given cohorts
+##Better to have a function. Do data frames per age groups?
+###Do for years (rather than the age of a cohort)
+
+
+output_age_sex <- filter(output_df, age >= 22 & sex == "males") %>% select(sex, age, inc_num_bl_ihd, inc_num_sc_ihd, inc_num_bl_istroke, inc_num_sc_istroke, inc_num_bl_diabetes, inc_num_sc_diabetes, inc_num_bl_colon_cancer, inc_num_sc_colon_cancer, inc_num_bl_breast_cancer, inc_num_sc_breast_cancer, mx_num_bl_ihd, mx_num_sc_ihd, mx_num_bl_istroke, mx_num_sc_istroke, mx_num_bl_diabetes, mx_num_sc_diabetes, mx_num_bl_colon_cancer, mx_num_sc_colon_cancer, mx_num_bl_breast_cancer, mx_num_sc_breast_cancer)
+
+#Example 1: baseline and scenario number of ihd deaths for first 20 yrs
+#of simulation for the age and sex cohort 22-males. 
+#That is to say, this graph shows the "simulated" number of deaths from ihd
+#for the baseline and scenario 22-males for the next 20 yrs. 
+
+#Add title to graph and change the y-axis and x-axis names
+
+output_age_sex[1:20,] %>% select(age, inc_num_bl_ihd, inc_num_sc_ihd)
+
+inc_num_22_males <- ggplot(data = output_age_sex[1:20,] %>% select(age, inc_num_bl_ihd, inc_num_sc_ihd)) +
+  geom_line(mapping = aes(x = age, y = inc_num_bl_ihd, colour = "inc_num_bl_ihd")) +
+  geom_line(mapping = aes(x = age, y = inc_num_sc_ihd, colour = "inc_num_sc_ihd"))
+
+
+inc_num_22_males + labs(title = "Incidence IHD \n males 22", colour = " ") + 
+  ylab("Number of cases") + 
+  xlab("Cohort age")
+
+# Not working, overriding above, also, centre plot title and change label names
+# # main title
+# mx_num_22_males + theme(
+# plot.title = element_text(family = "Calibri (Body)", face = "bold", colour = "black", size = 14), 
+# # x axis title 
+# axis.title.x = element_text(family = "Calibri (Body)", face = "bold", colour = "black", size = 14), 
+# # y axis title
+# axis.title.y = element_text(family = "Calibri (Body)", face = "bold", colour = "black", size = 14)
+#  )
