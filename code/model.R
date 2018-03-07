@@ -480,10 +480,6 @@ for (age in p_age_cohort){
       
     }
     
-    td3 <- select(disease_life_table_list_sc[[index]], c('incidence_disease', 'mx', 'px'))
-    names(td3)[names(td3) == 'incidence_disease'] <- paste('incidence_disease', disease, "sc", sep = "_")
-    
-    
     # general_life_table_list_sc and general_life_table_list_bl (Lx)
     output_burden_lf_sc <- select(general_life_table_list_sc[[l_index]], c('Lx', 'Lwx'))
     names(output_burden_lf_sc)[names(output_burden_lf_sc) == 'Lx'] <- paste('Lx', "sc", sep = "_")
@@ -508,13 +504,9 @@ for (age in p_age_cohort){
 }
 
 #Uncomment to check
-View(output_burden[[1]])
+View(output_burden[[32]])
 
 
-###Check why there is no difference in th Lx 
-
-View(general_life_table_list_bl[[1]])
-View(general_life_table_list_sc[[1]])
 
 
 ############################################################Outputs########################################################################################
