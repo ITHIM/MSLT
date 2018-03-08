@@ -579,3 +579,12 @@ inc_num_22_males + labs(title = "Incidence IHD \n males 22", colour = " ") +
   ylab("Number of cases") + 
   xlab("Cohort age")
 
+
+###################################Documenting################################################
+
+
+require(roxygen2)
+
+#This will work for package development. 
+
+#Try markdown, to generate an md file with text. 

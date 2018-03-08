@@ -317,19 +317,4 @@ run_pif <- function(in_idata, i_irr, i_exposure, in_mid_age, in_sex, in_disease,
 ################################################Function for output#############################################
 
 
-###Graph change in burden of disease for x simulation years for: specific cohort, all cohorts. 
-###In outcome to specify disase (incident cases and deaths) and life years (and adjusted for disability)
-
-run_graph_burden <- function(in_data, in_cohort, in_sex, in_simulation_yrs, in_outcome)
-
-
-
-graph_burden_df <- filter(in_idata, ((age >= in_cohort) & (in_cohort <= 100)), sex == in_sex) %>%
-
-    for (i in 1:nrow(in_cohort)){
-      
-       ggplot(data = in_data) +
-        geom_line(mapping = aes(x = age, y = in_outcome, colour)
-    
-    }
-
+###To do
