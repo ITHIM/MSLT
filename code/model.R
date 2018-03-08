@@ -470,6 +470,7 @@ for (age in p_age_cohort){
           
           output_burden_sc <- cbind(output_burden_sc, td3)
           output_burden_sc <- cbind(output_burden_sc, td4)
+          output_burden_sc$age_cohort <- age 
           output_burden_sc <- cbind(output_burden_sc, output_burden_change2)
           
         }
