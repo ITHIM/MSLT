@@ -513,6 +513,21 @@ View(output_burden[[32]])
 
 output_df <- plyr::ldply(output_burden, rbind)
 
+
+#Remove variables that are not used in the generation of outputs
+
+output_df <- subset(output_df, select = -c(incidence_disease_ihd_bl, incidence_disease_ihd_sc, 
+                                           incidence_disease_istroke_bl, incidence_disease_istroke_sc, 
+                                           incidence_disease_diabetes_bl, incidence_disease_diabetes_sc, 
+                                           incidence_disease_breast_cancer_bl, incidence_disease_breast_cancer_sc, 
+                                           incidence_disease_colon_cancer_bl, incidence_disease_colon_cancer_sc, 
+                                           mx_ihd_bl, mx_ihd_sc, mx_istroke_bl, mx_istroke_sc, mx_diabetes_bl, mx_diabetes_sc, 
+                                           mx_breast_cancer_bl, mx_breast_cancer_sc, mx_colon_cancer_bl, mx_colon_cancer_sc, 
+                                           px_ihd_bl, px_ihd_sc, px_istroke_bl, px_istroke_sc, px_diabetes_bl, px_diabetes_sc, 
+                                           px_breast_cancer_bl, px_breast_cancer_sc, px_colon_cancer_bl, px_colon_cancer_sc))
+
+
+
 ###some calculations
 
 ##Sum over all age sex cohorts total (all years)
@@ -524,7 +539,7 @@ Lx_sum <- sum(output_df$Lx_diff)
 Lwx_sum <- sum(output_df$Lwx_diff)
 
 
-#Could to a loop
+#Could do a loop
 #Incident cases
 Incident_ihd_total <- sum(output_df$inc_num_diff_ihd)
 Incident_istroke_total <- sum(output_df$inc_num_diff_istroke)
@@ -564,12 +579,3 @@ inc_num_22_males + labs(title = "Incidence IHD \n males 22", colour = " ") +
   ylab("Number of cases") + 
   xlab("Cohort age")
 
-# Not working, overriding above, also, centre plot title and change label names
-# # main title
-# mx_num_22_males + theme(
-# plot.title = element_text(family = "Calibri (Body)", face = "bold", colour = "black", size = 14), 
-# # x axis title 
-# axis.title.x = element_text(family = "Calibri (Body)", face = "bold", colour = "black", size = 14), 
-# # y axis title
-# axis.title.y = element_text(family = "Calibri (Body)", face = "bold", colour = "black", size = 14)
-#  )
