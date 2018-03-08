@@ -318,3 +318,37 @@ run_pif <- function(in_idata, i_irr, i_exposure, in_mid_age, in_sex, in_disease,
 
 
 ###To do
+
+plot_output <- function(in_data, in_age, in_population, in_outcomes){
+  
+  # in_data <- output_df
+  # in_population <- "males"
+  # in_age <- 22
+  # in_outcomes <- c('inc_num_bl_ihd', 'inc_num_sc_ihd')
+  
+  data <- in_data
+  
+  if (in_population != "total")
+    data <- filter(data, sex == in_population)
+  if (length(in_age) > 0)
+    data <- filter(data, age_cohort == in_age)
+  if (length(in_outcomes) > 0)
+    data <- select(data, in_outcomes)
+  
+  td <- data
+  
+  p <- ggplot(data = td)
+  # loop
+  for (i in 1:length(in_outcomes)) {
+    # use aes_string with names of the data.frame
+    p <- p + geom_line(mapping = aes(x = age, y = in_outcomes[i]))
+  }
+  # print the result
+  print(p)
+  
+  # inc_num_22_males + labs(title = "Incidence IHD \n males 22", colour = " ") + 
+  #   ylab("Number of cases") + 
+  #   xlab("Cohort age")
+  
+  
+}
