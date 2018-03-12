@@ -2,7 +2,7 @@
 
 require(dplyr)
 require(tidyverse)
-require(stats)
+#require(stats)
 
 #############################Explanation method###################################
 
@@ -346,4 +346,47 @@ plot_output <- function(in_data, in_age, in_population, in_outcomes){
   # print the result
   print(p)
   
+}
+
+gen_aggregate <- function(in_data, in_sim_years, in_population, in_outcomes){
+  
+  
+  # in_data <- output_df
+  # in_population <- "males"
+  # in_sim_years <- 10
+  # in_outcomes <- c('inc_num_bl_ihd', 'inc_num_sc_ihd')
+  age_cohort_list <- list()
+  td <- in_data
+  aggr <- list()
+  l_age <-  min(td$age_cohort)
+  for (i in 1:in_sim_years){
+    if (l_age <= 100){
+      ld <- dplyr::filter(td, age_cohort == l_age)
+      
+      if (in_population != "total")
+        ld <- filter(ld, sex == in_population)
+      if (length(in_outcomes) > 0)
+        ld <- select(ld, age, sex, in_outcomes)
+      if (i == 1){
+        aggr <- append(aggr, as.list(ld))
+        aggr <- as.data.frame(aggr)
+        names(aggr) <- paste(names(aggr), l_age, in_population, sep = "_" )
+      }
+      else {
+        n_rows <-  nrow(aggr) - nrow(ld)
+        ld[(nrow(ld) + 1):(nrow(ld) + n_rows),] <- NA
+        names(ld) <- paste(names(ld), l_age, in_population, sep = "_" )
+        aggr <- cbind(aggr, ld)
+      }
+      
+      l_age <- l_age + 5
+    }
+  }
+  
+  for (i in 1:length(in_outcomes)){
+    aggr[[paste0("total_",in_outcomes[i])]] <- select(aggr, starts_with(in_outcomes[i])) %>% rowSums(na.rm = T)
+    
+  }
+  
+  aggr
 }
