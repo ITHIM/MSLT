@@ -324,7 +324,7 @@ plot_output <- function(in_data, in_age, in_population, in_outcomes){
   # in_data <- output_df
   # in_population <- "males"
   # in_age <- 22
-  # in_outcomes <- c('inc_num_bl_ihd', 'inc_num_sc_ihd')
+  # in_outcomes <- c('age', 'inc_num_bl_ihd', 'inc_num_sc_ihd')
   
   data <- in_data
   
@@ -336,19 +336,14 @@ plot_output <- function(in_data, in_age, in_population, in_outcomes){
     data <- select(data, in_outcomes)
   
   td <- data
-  
-  p <- ggplot(data = td)
+  p <- ggplot(data = td, aes (x = td[[in_outcomes[[1]]]]))
+
   # loop
-  for (i in 1:length(in_outcomes)) {
+  for (i in 2:length(in_outcomes)) {
     # use aes_string with names of the data.frame
-    p <- p + geom_line(mapping = aes(x = age, y = in_outcomes[i]))
+    p <- p + geom_line(aes_string(y = td[[in_outcomes[i]]]))
   }
   # print the result
   print(p)
-  
-  # inc_num_22_males + labs(title = "Incidence IHD \n males 22", colour = " ") + 
-  #   ylab("Number of cases") + 
-  #   xlab("Cohort age")
-  
   
 }
