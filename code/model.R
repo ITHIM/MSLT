@@ -529,6 +529,12 @@ output_df <- subset(output_df, select = -c(incidence_disease_ihd_bl, incidence_d
 
 
 
+############
+
+plot_output(in_data = output_df, in_population = "males", in_age = 22, in_outcomes = c('age', 'inc_num_bl_ihd', 'inc_num_sc_ihd', 'inc_num_diff_diabetes', 'Lwx_diff'))
+
+############
+
 ###some calculations
 
 ##Sum over all age sex cohorts total (all years)
