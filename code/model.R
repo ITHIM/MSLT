@@ -529,69 +529,19 @@ output_df <- subset(output_df, select = -c(incidence_disease_ihd_bl, incidence_d
 
 
 
+#############################################Plot outputs#####################################################
+
+######Generate outcomes graphs by age and sex and outcome of interest. 
+######Do a loop and change labels
+
+plot_eg <- plot_output(in_data = output_df, in_population = "males", in_age = 32, in_outcomes = c('age', 'inc_num_bl_ihd', 'inc_num_sc_ihd'))
+
 ############
+#########DO PLOT
 
-plot_output(in_data = output_df, in_population = "males", in_age = 22, in_outcomes = c('age', 'inc_num_bl_ihd', 'inc_num_sc_ihd', 'inc_num_diff_diabetes', 'Lwx_diff'))
-
-############
-
-###some calculations
-
-##Sum over all age sex cohorts total (all years)
-
-#Life years
-Lx_sum <- sum(output_df$Lx_diff)
-
-#Health-adjusted life years
-Lwx_sum <- sum(output_df$Lwx_diff)
+aggregate_frame <- gen_aggregate(in_data = output_df, in_sim_years = 10, in_population = "total", in_outcomes = c('inc_num_bl_ihd','inc_num_sc_ihd'))
 
 
-#Could do a loop
-#Incident cases
-Incident_ihd_total <- sum(output_df$inc_num_diff_ihd)
-Incident_istroke_total <- sum(output_df$inc_num_diff_istroke)
-Incident_diabetes_total <- sum(output_df$inc_num_diff_diabetes)
-Incident_breast_cancer_total <- sum(output_df$inc_num_diff_breast_cancer, na.rm=TRUE)
-Incident_colon_cancer_total <- sum(output_df$inc_num_diff_colon_cancer)
-
-#Death
-mx_ihd_total <- sum(output_df$mx_num_diff_ihd)
-mx_istroke_total <- sum(output_df$mx_num_diff_istroke)
-mx_diabetes_total <- sum(output_df$mx_num_diff_diabetes)
-mx_breast_cancer_total <- sum(output_df$mx_num_diff_breast_cancer, na.rm=TRUE)
-mx_colon_cancer_total <- sum(output_df$mx_num_diff_colon_cancer)
-
-#Outputs over 20 years (example) for given cohorts
-##Better to have a function. Do data frames per age groups?
-###Do for years (rather than the age of a cohort)
+########See https://github.com/ITHIM/ITHIM-R/projects/1 for project work flow#################
 
 
-output_age_sex <- filter(output_df, age >= 22 & sex == "males") %>% select(sex, age, inc_num_bl_ihd, inc_num_sc_ihd, inc_num_bl_istroke, inc_num_sc_istroke, inc_num_bl_diabetes, inc_num_sc_diabetes, inc_num_bl_colon_cancer, inc_num_sc_colon_cancer, inc_num_bl_breast_cancer, inc_num_sc_breast_cancer, mx_num_bl_ihd, mx_num_sc_ihd, mx_num_bl_istroke, mx_num_sc_istroke, mx_num_bl_diabetes, mx_num_sc_diabetes, mx_num_bl_colon_cancer, mx_num_sc_colon_cancer, mx_num_bl_breast_cancer, mx_num_sc_breast_cancer)
-
-#Example 1: baseline and scenario number of ihd deaths for first 20 yrs
-#of simulation for the age and sex cohort 22-males. 
-#That is to say, this graph shows the "simulated" number of deaths from ihd
-#for the baseline and scenario 22-males for the next 20 yrs. 
-
-#Add title to graph and change the y-axis and x-axis names
-
-output_age_sex[1:20,] %>% select(age, inc_num_bl_ihd, inc_num_sc_ihd)
-
-inc_num_22_males <- ggplot(data = output_age_sex[1:20,] %>% select(age, inc_num_bl_ihd, inc_num_sc_ihd)) +
-  geom_line(mapping = aes(x = age, y = inc_num_bl_ihd, colour = "inc_num_bl_ihd")) +
-  geom_line(mapping = aes(x = age, y = inc_num_sc_ihd, colour = "inc_num_sc_ihd"))
-
-
-inc_num_22_males + labs(title = "Incidence IHD \n males 22", colour = " ") + 
-  ylab("Number of cases") + 
-  xlab("Cohort age")
-
-
-###################################Documenting################################################
-
-
-require(roxygen2)
-
-#This will work for package development. 
-
-#Try markdown, to generate an md file with text. 

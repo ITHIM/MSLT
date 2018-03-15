@@ -316,8 +316,8 @@ run_pif <- function(in_idata, i_irr, i_exposure, in_mid_age, in_sex, in_disease,
 
 ################################################Function for output#############################################
 
+##### function to generate graphs by age and sex, per ooutcome of interest. 
 
-###To do
 
 plot_output <- function(in_data, in_age, in_population, in_outcomes){
   
@@ -348,18 +348,23 @@ plot_output <- function(in_data, in_age, in_population, in_outcomes){
   
 }
 
+
+###Function to generate aggregated outcome for all age groups and gender
+
+
 gen_aggregate <- function(in_data, in_sim_years, in_population, in_outcomes){
   
   
   # in_data <- output_df
   # in_population <- "males"
-  # in_sim_years <- 10
+  # in_cohorts <- 10
   # in_outcomes <- c('inc_num_bl_ihd', 'inc_num_sc_ihd')
+  
   age_cohort_list <- list()
   td <- in_data
   aggr <- list()
   l_age <-  min(td$age_cohort)
-  for (i in 1:in_sim_years){
+  for (i in 1:in_cohorts){
     if (l_age <= 100){
       ld <- dplyr::filter(td, age_cohort == l_age)
       
