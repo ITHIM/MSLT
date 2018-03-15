@@ -336,12 +336,19 @@ plot_output <- function(in_data, in_age, in_population, in_outcomes){
     data <- select(data, in_outcomes)
   
   td <- data
-  p <- ggplot(data = td, aes (x = td[[in_outcomes[[1]]]]))
+  
+  ###in_outcome index 1 is age, so the graph then shows changes over time.
+  
+  p <- ggplot(data = td, aes (x = td[[in_outcomes[[1]]]])) +
+   xlab("Age cohort")
 
   # loop
   for (i in 2:length(in_outcomes)) {
     # use aes_string with names of the data.frame
-    p <- p + geom_line(aes_string(y = td[[in_outcomes[i]]]))
+    p <- p + geom_line(aes_string(y = td[[in_outcomes[i]]])) +
+    ylab("Cases")
+   
+    
   }
   # print the result
   print(p)
@@ -349,10 +356,11 @@ plot_output <- function(in_data, in_age, in_population, in_outcomes){
 }
 
 
+
 ###Function to generate aggregated outcome for all age groups and gender
 
 
-gen_aggregate <- function(in_data, in_sim_years, in_population, in_outcomes){
+gen_aggregate <- function(in_data, in_cohorts, in_population, in_outcomes){
   
   
   # in_data <- output_df

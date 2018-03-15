@@ -527,19 +527,27 @@ output_df <- subset(output_df, select = -c(incidence_disease_ihd_bl, incidence_d
                                            px_ihd_bl, px_ihd_sc, px_istroke_bl, px_istroke_sc, px_diabetes_bl, px_diabetes_sc, 
                                            px_breast_cancer_bl, px_breast_cancer_sc, px_colon_cancer_bl, px_colon_cancer_sc))
 
-
-
 #############################################Plot outputs#####################################################
 
-######Generate outcomes graphs by age and sex and outcome of interest. 
-######Do a loop and change labels
+###### Generate outcomes graphs by age and sex and outcome of interest. 
+######Here sepcify in_population with sex (males or females), in_age for the starting age of the cohort of interest
+###### and in_outomes with age (to show evolution of cohort over time) and outcome of interest (bl is for baseline, sc for scenario 
+###### and dif for the difference between the two). 
 
-plot_eg <- plot_output(in_data = output_df, in_population = "males", in_age = 32, in_outcomes = c('age', 'inc_num_bl_ihd', 'inc_num_sc_ihd'))
 
+plot_eg <- plot_output(in_data = output_df, in_population = "males", in_age = 32, in_outcomes = c('age', 'inc_num_bl_ihd', 'inc_num_sc_ihd')) 
+  
+plot_eg + theme(legend.position = "top")
+# ylab=c("Incidence baseline", "Incidence sceanario")
+  
 ############
-#########DO PLOT
+#########DO PLOT based on aggregate data frame
 
-aggregate_frame <- gen_aggregate(in_data = output_df, in_sim_years = 10, in_population = "total", in_outcomes = c('inc_num_bl_ihd','inc_num_sc_ihd'))
+
+###########################################Outputs numbers####################################################
+
+####Generate a function to add up outputs per age and sex and overall. 
+aggregate_frame <- gen_aggregate(in_data = output_df, in_cohorts = 2, in_population = "total", in_outcomes = c('inc_num_bl_ihd','inc_num_sc_ihd'))
 
 
 ########See https://github.com/ITHIM/ITHIM-R/projects/1 for project work flow#################
