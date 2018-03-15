@@ -551,10 +551,8 @@ aggregate_frame_males <- gen_aggregate(in_data = output_df, in_cohorts = 2, in_p
 aggregate_frame_females <- gen_aggregate(in_data = output_df, in_cohorts = 2, in_population = "females", in_outcomes = c('inc_num_bl_ihd','inc_num_sc_ihd'))
 
 # Remove non-numeric columns starting with age and sex
-aggregate_frame_males <- select(aggregate_frame_males, -starts_with("age"))
-aggregate_frame_males <- select(aggregate_frame_males, -starts_with("sex"))
-aggregate_frame_females <- select(aggregate_frame_females, -starts_with("age"))
-aggregate_frame_females <- select(aggregate_frame_females, -starts_with("sex"))
+aggregate_frame_males <- aggregate_frame_males %>% select(-starts_with("age"), -starts_with("sex"))
+aggregate_frame_females <- aggregate_frame_females %>% select(-starts_with("age"), -starts_with("sex"))
 # Create a copy of aggregate_frame_females
 total_aggr <- aggregate_frame_females
 # Add aggregate_frame_males values to it
