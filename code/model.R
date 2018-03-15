@@ -547,9 +547,20 @@ plot_eg + theme(legend.position = "top")
 ###########################################Outputs numbers####################################################
 
 ####Generate a function to add up outputs per age and sex and overall. 
-aggregate_frame <- gen_aggregate(in_data = output_df, in_cohorts = 2, in_population = "total", in_outcomes = c('inc_num_bl_ihd','inc_num_sc_ihd'))
+aggregate_frame_males <- gen_aggregate(in_data = output_df, in_cohorts = 2, in_population = "males", in_outcomes = c('inc_num_bl_ihd','inc_num_sc_ihd'))
+aggregate_frame_females <- gen_aggregate(in_data = output_df, in_cohorts = 2, in_population = "females", in_outcomes = c('inc_num_bl_ihd','inc_num_sc_ihd'))
 
-
+# Remove non-numeric columns starting with age and sex
+aggregate_frame_males <- select(aggregate_frame_males, -starts_with("age"))
+aggregate_frame_males <- select(aggregate_frame_males, -starts_with("sex"))
+aggregate_frame_females <- select(aggregate_frame_females, -starts_with("age"))
+aggregate_frame_females <- select(aggregate_frame_females, -starts_with("sex"))
+# Create a copy of aggregate_frame_females
+total_aggr <- aggregate_frame_females
+# Add aggregate_frame_males values to it
+for (i in 1:ncol(aggregate_frame_females)){
+  total_aggr[i] <- total_aggr[i] + aggregate_frame_males[i]
+}
 ########See https://github.com/ITHIM/ITHIM-R/projects/1 for project work flow#################
 
 
