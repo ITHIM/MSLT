@@ -515,7 +515,7 @@ View(output_burden[[32]])
 output_df <- plyr::ldply(output_burden, rbind)
 
 
-#Remove variables that are not used in the generation of outputs
+#Remove variables that are not used in the generation of outputs. CHANGE THIS NAMES, TOO LONG
 
 output_df <- subset(output_df, select = -c(incidence_disease_ihd_bl, incidence_disease_ihd_sc, 
                                            incidence_disease_istroke_bl, incidence_disease_istroke_sc, 
@@ -534,31 +534,45 @@ output_df <- subset(output_df, select = -c(incidence_disease_ihd_bl, incidence_d
 ###### and in_outomes with age (to show evolution of cohort over time) and outcome of interest (bl is for baseline, sc for scenario 
 ###### and dif for the difference between the two). 
 
+##### Second variable in in_outcomes should be the baseline, the second the scenario and the third the difference.
+###In_legend to speficy the name of the disease plotted and outcome (incidence or mortality)
 
-plot_eg <- plot_output(in_data = output_df, in_population = "males", in_age = 32, in_outcomes = c('age', 'inc_num_bl_ihd', 'inc_num_sc_ihd')) 
-  
-plot_eg + theme(legend.position = "top")
-# ylab=c("Incidence baseline", "Incidence sceanario")
-  
-############
-#########DO PLOT based on aggregate data frame
+
+plot_eg <- plot_output(in_data = output_df, in_age = 22, in_population = "males", in_outcomes = c("age", "mx_num_bl_ihd", "mx_num_sc_ihd", "mx_num_diff_ihd"), in_legend = "Ischemic Heart Disease Deaths")
 
 
 ###########################################Outputs numbers####################################################
+####Generate data frame with all outputs to graph total change in burden by simulation year. 
+###first, need to run function for males and females separetly, in_cohorts indicates the number of age cohorts to 
+####include. To show all select 16. what is specified in in_outcomes will be graphed or can also be presented as a total. 
+ddaggregate_frame_males <- gen_aggregate(in_data = output_df, in_cohorts = 16, in_population = "males", in_outcomes = c('inc_num_bl_ihd','inc_num_sc_ihd', "inc_num_diff_ihd"))
 
-####Generate a function to add up outputs per age and sex and overall. 
-aggregate_frame_males <- gen_aggregate(in_data = output_df, in_cohorts = 2, in_population = "males", in_outcomes = c('inc_num_bl_ihd','inc_num_sc_ihd'))
-aggregate_frame_females <- gen_aggregate(in_data = output_df, in_cohorts = 2, in_population = "females", in_outcomes = c('inc_num_bl_ihd','inc_num_sc_ihd'))
+aggregate_frame_females <- gen_aggregate(in_data = output_df, in_cohorts = 16, in_population = "females", in_outcomes = c('inc_num_bl_ihd','inc_num_sc_ihd', "inc_num_diff_ihd"))
 
+#####The following adds up both males and females
 # Remove non-numeric columns starting with age and sex
 aggregate_frame_males <- aggregate_frame_males %>% select(-starts_with("age"), -starts_with("sex"))
+
 aggregate_frame_females <- aggregate_frame_females %>% select(-starts_with("age"), -starts_with("sex"))
+
 # Create a copy of aggregate_frame_females
 total_aggr <- aggregate_frame_females
 # Add aggregate_frame_males values to it
 for (i in 1:ncol(aggregate_frame_females)){
   total_aggr[i] <- total_aggr[i] + aggregate_frame_males[i]
 }
-########See https://github.com/ITHIM/ITHIM-R/projects/1 for project work flow#################
+total_aggr$sim_year <- seq.int(nrow(total_aggr))
 
+######################Plot total_aggr
+
+####This plot has to be customised to in_outcomes, here, only totals shown, but specifications are up to the user
+
+####[] is used here to indicate the number of simulation years into the future. 
+
+total_plot <- ggplot(total_aggr[1:20,], aes(x = sim_year)) +
+  geom_line(mapping = aes(x=sim_year, y = total_inc_num_bl_ihd, colour = "total_mx_num_bl_ihd")) +
+  geom_line(mapping = aes(x=sim_year, y = total_inc_num_diff_ihd, colour = "total_mx_num_diff_ihd")) 
+
+#Print to view
+print(total_plot)
 
