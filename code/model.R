@@ -568,11 +568,21 @@ total_aggr$sim_year <- seq.int(nrow(total_aggr))
 ####This plot has to be customised to in_outcomes, here, only totals shown, but specifications are up to the user
 
 ####[] is used here to indicate the number of simulation years into the future. 
+####Disease outcomes has to be changed to the outcome of interest
+
+disease_outcome <- "Deaths ischemic heart disease"
 
 total_plot <- ggplot(total_aggr[1:20,], aes(x = sim_year)) +
-  geom_line(mapping = aes(x=sim_year, y = total_inc_num_bl_ihd, colour = "total_mx_num_bl_ihd")) +
-  geom_line(mapping = aes(x=sim_year, y = total_inc_num_diff_ihd, colour = "total_mx_num_diff_ihd")) 
+  
+  geom_line(mapping = aes(y = total_inc_num_bl_ihd, colour = "total_mx_num_bl_ihd")) +
+  theme_classic() +
+  geom_hline(yintercept=0, linetype="dashed", color = "black") +
+  geom_line(mapping = aes(y = total_inc_num_sc_ihd, colour = "total_mx_num_sc_ihd")) +
+  geom_line(mapping = aes(y = total_inc_num_diff_ihd, colour = "total_mx_num_diff_ihd")) +
+  xlab ("Simulation years") + ylab ("Cases") + labs (title = paste(disease_outcome)) +
+  theme(plot.title = element_text(hjust = 0.5, size = 12)) +
+  scale_color_discrete(name = paste(""), labels = c("Baseline", "Scenario", "Difference"))
+  
 
 #Print to view
 print(total_plot)
-
