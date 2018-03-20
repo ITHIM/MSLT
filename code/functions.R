@@ -319,12 +319,13 @@ run_pif <- function(in_idata, i_irr, i_exposure, in_mid_age, in_sex, in_disease,
 ##### function to generate graphs by age and sex, per ooutcome of interest. 
 
 
-plot_output <- function(in_data, in_age, in_population, in_outcomes){
+plot_output <- function(in_data, in_age, in_population, in_outcomes, in_legend){
   
   # in_data <- output_df
   # in_population <- "males"
   # in_age <- 22
   # in_outcomes <- c('age', 'inc_num_bl_ihd', 'inc_num_sc_ihd')
+  # in_cols <- c('alpha', 'beta')
   
   data <- in_data
   
@@ -336,25 +337,30 @@ plot_output <- function(in_data, in_age, in_population, in_outcomes){
     data <- select(data, in_outcomes)
   
   td <- data
+  p <- ggplot(data = td, aes (x = td[[in_outcomes[[1]]]]))
   
-  ###in_outcome index 1 is age, so the graph then shows changes over time.
-  
-  p <- ggplot(data = td, aes (x = td[[in_outcomes[[1]]]])) +
-   xlab("Age cohort")
-
   # loop
   for (i in 2:length(in_outcomes)) {
     # use aes_string with names of the data.frame
-    p <- p + geom_line(aes_string(y = td[[in_outcomes[i]]])) +
-    ylab("Cases")
-   
+    p <- p + geom_line(aes_string(y = td[[in_outcomes[i]]], color = as.factor(in_outcomes[i])), size = 0.8) +
+      theme_classic() 
+    
     
   }
+  
+  p <- p + scale_color_discrete(name = paste(in_legend), labels = c("Baseline", "Scenario", "Difference"))
+  
+  p <- p + xlab ('Age') + ylab ('Cases') + labs (title = paste('Cohort', in_age, "years old", in_population, sep = " ")) +
+    theme(plot.title = element_text(hjust = 0.5, size = 12)) + 
+    xlim(in_age, 100) +
+    geom_hline(yintercept=0, linetype="dashed", color = "black")
+  
+  
   # print the result
   print(p)
   
-}
 
+}
 
 
 ###Function to generate aggregated outcome for all age groups and gender
