@@ -9,8 +9,6 @@ output:
   fontsize: 11 pt
   geometry: margin=1in
   bibliography: Bibliography.txt
-  
-
 ---
 
 ```{r setup, include=FALSE}
