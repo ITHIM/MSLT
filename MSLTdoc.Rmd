@@ -23,20 +23,16 @@ The proportional multi-state multiple-cohort life table model (PMSLT) is a popul
 
 The model was developed by Jan Barendregt and colleagues (REF ACE prevention and core papers) and has been widely used in Australia and New Zealand (Ref ACE-report and BODE website of key publications). 
 
-The basic infrastructure of the model consist of three components: (1) Effect size for the intervention of interest (e.g. intervention to urban design that modifies population levels of physical activity); (2) Calculation of the potential impact fraction (PIF) to derive the change in occurence of disease (indidence rate/mortality rate) attributable to a change in the distrubution of the risk factor (e.g. physical activity); and (3) Use of the PMSLT to simulate health (and economic) outcomes attributable to a change in the distribution of health risk factor/s in the population of interest. Figure 1 summarises the basic infrastructure of the model. ITHIM is included in Figure 1 to show that both approaches share in common steps one and two and differ in the mechanisms of calculation of change in health burden (explain in more details in the next section). 
+The basic infrastructure of the model consist of three components: (1) Effect size for the intervention of interest (e.g. intervention to urban design that modifies population levels of physical activity); (2) Calculation of the potential impact fraction (PIF) to derive the change in occurence of disease (indidence rate/mortality rate) attributable to a change in the distrubution of the risk factor (e.g. physical activity); and (3) Use of the PMSLT to simulate health (and economic) outcomes attributable to a change in the distribution of health risk factor/s in the population of interest. Figure 1 summarises the basic infrastructure of the model. ITHIM is included in Figure 1 to show that both approaches share in common steps one and two and differ in the mechanisms of calculation of change in health burden. 
 
 ![Figure 1. Basic model infrastructure.](structure\Figure1.png)
-
-In this first intance (basic model infrastructure), the model is set up as a long script to perform the mathematical calculations. Where possible, we wrote functions and loops to avoid repetition. We set up the basic model infrastucture with Australian data, for Melbourne. In what follows, first, we describe the link the the PMSLT model witht the ITHIMR framework. Second, we describe the mechanism of the PMSLT and input parameters. Third, we present the code with explaining notes. Fourth, we present examples of outcomes and last comments related to implementation. Here we only included the physical activity health pathway. In the comments section, implementation of exposure to air pollution and road trauma is discussed. 
-
-
 
 ## Contribution to ITHIMR
 
 The PMSLT similar to ITHIM is a comparative risk assessment approach (REF BRIGGS 2016) that consist of calculating the change in the health burden for a population of interest from a change in exposure to health risks factors (e.g. physical inactivity, air pollution and road trauma).As depicted in Figure 1, both methods need estimates of the potential impact fraction (PIF), which indicates the proportion of the disease burden attributable to a risk factor of interest (e.g. physical inactivity). A step further back, is the development of scenarios that bring about change in the distrubution of the risk factor of interest. For now, we only focus on calculations from the PIF onwards, and provide a hypothetical example of change in population levels of physical activity. Incorporation of additional  health risk factor (air pollution, road trauma, NO2 and noise) will be discussed in the relevant code sections. 
 
 
-## Difference between ITHIM and PMSLT
+### Difference between ITHIM and PMSLT
 
 * **Time component**
     The *PMSLT* follows a population of interest over time. For example, as set up here, we     simulate sex and age (5 years starting at 18) cohorts over time until they die or           reach 100 years of age. This implies that we can include trends for diseases, time lags     between change in exposure to risk factors and change in health and demographic changes     (e.g. population growth). In addition, we can estimate yearly changes in the burden of      diseases over the life course or for a speficied number of years. The *ITHIM* approach      is a snapshot of change in burden for one year.
@@ -51,17 +47,49 @@ The PMSLT similar to ITHIM is a comparative risk assessment approach (REF BRIGGS
     In GBD studies, YLLs are not adjusted for disability; hence, their use in estimating        intervention effects results in over-estimation, which the *PMSLT* approach avoids.         Another way of seeing this is that estimated changes in morbidity using the *ITHIM* do      not allow for how implicit increases in life expectancy impact on morbidity. While          the changes in deaths and prevalence using the *PMSLT* are in some ways more accurate       than those from the *ITHIM* approach it should be noted that that the average age of        death and incident disease will change and thus the disease burden will be on average be     shifted later in life (which is a realistic approach).
     
         
+# R development
 
+The model is set up as a long script to perform the requiered mathematical calculations. Where possible, we wrote functions and loops to avoid repetition. We set up the model  with Australian data, for Melbourne. Figure 2 is depicts the PMSLT model framework, which was followed in the code development. 
 
+![Figure 2. Proportional multi-state life-table .](structure\Figure2.png)
 
+In what follows, first, we specify input parameters. Second, we present the code with explaining notes. Third, we present examples of outcomes and lastly we comment on topics related to implementation. Here we only included the physical activity health pathway. In the comments section, implementation of exposure to air pollution and road trauma is discussed. Note that in the presentation of input parameters, those needed to calculate PIFs are excluded, as these are common to the ITHIM, expect if trends are included (refer to comments section)
 
-Model structure (paste figure). Assign a module. 
-Model inputs. These will be highlighted in the description of the code. 
-Connection with other modules (see github)
-Examples of outputs
-## R Markdown
+## Inputs (ADD A SUMMARY TABLE with inputs and potential sources of data)
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+We specify data requirements for the life table and disease life tables (Figure 2) and potential sources. 
+
+**Life table**: 
+
+Inputs of the life table are: population numbers by sex (per 1-year or age grouping of interest), mortality rates or probability of all cause mortality by single age group and sex and total prevalent years lived with disability rate per one year by sex. 
+
+1.	Population numbers
+
+These data will be provided by the synthetic population. In the code presented here, we created 5-year age and sex cohorts from one-year age groups data. I left potential data sources below as a reference. 
+
+Data source: (1) National census; (2) Worldwide population and mortality data:  http://www.mortality.org/ (mostly high income countries; and (3) Calculate from GBD data (rates and numbers). 
+
+2. Mortality rates
+Same sources as above for popuation numbers. Sometimes mortality rates are in age groups (1-4, 5-9, etc). Interpolation can be used to derive in between ages rates (cubic spline). 
+
+Note that we need data for population numbers and all cause mortality rates for: (1) PMSLT and (2) Dismod II collection (more in Dismod II section). 
+
+2.	Total prevalent years lived with disability rates per single year and sex. 
+Data sources:  GBD (http://ghdx.healthdata.org/gbd-results-tool)
+Notes: Data is available per 5-year age groups. Interpolation to derive between ages rates. 
+Disease life tables: 
+3.	Disability weights (quality of life weights): we derive them from YLD divided by P, and adjust for overall YLDs to account for accumulation of comorbidities in later years (not difficult, just a calculation). 
+4.	Incidence and case fatality rates: derived from GBD data using Dismod II. 
+Dismod II
+Use to derive internally consistent disease epidemiology estimates. Dismod II inputs are: (1) population numbers and mortality rates and (2) disease specific inputs. 
+5.	Population and mortality
+Population numbers (preferably the same as used in GBD studies, due to the mortality envelop) and all- cause mortality rates (numbers and calculate rates). Can be in 5-year age groups, can be derived from GBD data (rates and numbers). 
+Sources: (1) GBD (request needed). 
+6.	Disease inputs by age group and sex
+At least three of: case fatality, prevalence, incidence and mortality (disease). We assume remission is zero, so we need two inputs, or three. Prevalence in GBD studies assumes remission after 10 years for cancer and I need to check what else (except lifelong sequelaes, for example an imputation). This means that when processing and assuming zero remission, case fatality is overestimated and prevalence underestimated. All these are part of the data processing in Dismod II. For my latest model, we decided to use all three parameter inputs (incidence, mortality and prevalence) for non-cancers, and incidence and mortality for cancers. 
+
+Sources: (1) GBD available online by age and sex, for all countries in age groups from 0-5 to 95+. 
+
 
 When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
