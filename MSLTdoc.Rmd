@@ -3,18 +3,20 @@ title: "Proportional multi-state multiple-cohort life table model"
 author: "Belen Zapata-Diomedi and Ali Abbas"
 date: "26 March 2018"
 output:
-  pdf_document: default
-  html_document: default
-  github_document: default
+  pdf_document: 
+    toc: true
+    number_sections: true
+    fig_caption: yes
   fontsize: 11 pt
   geometry: margin=1in
-  bibliography: Bibliography.txt
+  
+  bibliography: MSLT\Bibliography.txt
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-#Introduction 
+# Introduction 
 
 The proportional multi-state multiple-cohort life table model (PMSLT) is a population level model (macro) approach to simulate health (and economic) implications of changes in exposure to health risk factors (e.g. physical inactivity, air pollution and diet). The PMSLT has been widely used to simulate outcomes for population level interventions for the reduction of chronic diseases. 
 
@@ -22,8 +24,16 @@ The model was developed by Jan Barendregt and colleagues (REF ACE prevention and
 
 The basic infrastructure of the model consist of three components: (1) Effect size for the intervention of interest (e.g. intervention to urban design that modifies population levels of physical activity); (2) Calculation of the potential impact fraction (PIF) to derive the change in occurence of disease (indidence rate/mortality rate) attributable to a change in the distrubution of the risk factor (e.g. physical activity); and (3) Use of the PMSLT to simulate health (and economic) outcomes attributable to a change in the distribution of health risk factor/s in the population of interest. Figure 1 summarises the basic infrastructure of the model. 
 
-![Figure 1. Basic model infrastructure.](structure\Slide1.PNG)
+![Figure 1. Basic model infrastructure.](structure\Figure1.png)
 
+-----
+In this first intance (basic model infrastructure), the model is set up as a long script to perform the mathematical calculations. Where possible, functions where written and loops used to avoid repetition. The basic model infrastucture is set up with Australian data, for Melbourne. In what follows, first, we describe the link the the PMSLT model witht the ITHIMR framework. Second, we describe the mechanism of the PMSLT and input parameters. Third, we present the code with explaining notes. Fourth, we present examples of outcomes and last comments related to implementation. Here we only included the physical activity health pathway. In the comments section, implementation of exposure to air pollution and road trauma is discussed. 
+
+
+
+## Contribution to ITHIMR
+
+The PMSLT as ITHIM is a comparative risk assessment approach that consist of calculating the change in the health burden for a population of interest from a change in exposure to health risks factors (e.g. physical inactivity, air pollution and road trauma). 
 
 Model structure (paste figure). Assign a module. 
 Model inputs. These will be highlighted in the description of the code. 
