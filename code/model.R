@@ -8,9 +8,10 @@ rm (list = ls())
 
 options(scipen=999)
 
-##### Load all functions
+##### Load all functions/packages
 
 source("code/functions.R")
+
 
 ##### Read data. idata: life table and disease life tables (including trends). edata: exposure data (e.g. physical activity).
 #### irr.data: relative risks data and ee: energy expenditure
